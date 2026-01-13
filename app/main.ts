@@ -8,10 +8,17 @@ const rl = createInterface({
 while (true) {
   const answer = await rl.question('$ ');
 
-  if (answer === 'exit') {
+  const [command, ...rest] = answer.split(' ');
+
+  if (command === 'exit') {
     rl.close();
     break;
   }
 
-  console.log(`${answer}: command not found`);
+  if (command === 'echo') {
+    console.log(`${rest.join(' ')}`);
+    continue;
+  }
+
+  console.log(`${command}: command not found`);
 }
