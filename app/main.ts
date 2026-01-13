@@ -1,12 +1,12 @@
-import { createInterface } from 'readline';
+import { createInterface } from 'node:readline/promises';
 
 const rl = createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-rl.question('$ ', (command) => {
-  console.log(`${command}: command not found`);
+while (true) {
+  const command = await rl.question('$ ');
 
-  rl.close();
-});
+  console.log(`${command}: command not found`);
+}
