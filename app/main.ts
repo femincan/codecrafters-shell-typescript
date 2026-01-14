@@ -5,6 +5,8 @@ const rl = createInterface({
   output: process.stdout,
 });
 
+const builtinCommands = new Set(['exit', 'echo', 'type']);
+
 while (true) {
   const answer = await rl.question('$ ');
 
@@ -17,6 +19,16 @@ while (true) {
 
   if (command === 'echo') {
     console.log(`${rest.join(' ')}`);
+    continue;
+  }
+
+  if (command === 'type') {
+    const arg = rest.join('');
+    if (builtinCommands.has(arg)) {
+      console.log(`${arg} is a shell builtin`);
+    } else {
+      console.log(`${arg}: not found`);
+    }
     continue;
   }
 
