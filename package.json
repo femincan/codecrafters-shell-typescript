@@ -1,6 +1,6 @@
 {
-  "name": "@codecrafters/shell",
-  "description": "Build your own Shell challenge, from CodeCrafters",
+  "name": "typescript-shell",
+  "description": "A shell built with TypeScript",
   "type": "module",
   "scripts": {
     "dev": "bun run app/main.ts"
