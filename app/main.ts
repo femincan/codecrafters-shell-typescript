@@ -1,36 +1,73 @@
 import { createInterface } from 'node:readline/promises';
 
+// ==================
+// Globals
+// ==================
+
 const rl = createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-const builtinCommands = new Set(['exit', 'echo', 'type']);
+const state = {
+  rlOpen: true,
+};
 
-while (true) {
-  const answer = await rl.question('$ ');
+const commandsMap = new Map([
+  ['exit', exit],
+  ['echo', echo],
+  ['type', type],
+]);
 
-  const [command, ...rest] = answer.split(' ');
+// ==================
+// Main Function
+// ==================
 
-  if (command === 'exit') {
-    rl.close();
-    break;
-  }
+async function main() {
+  while (state.rlOpen) {
+    const input = await rl.question('$ ');
 
-  if (command === 'echo') {
-    console.log(`${rest.join(' ')}`);
-    continue;
-  }
-
-  if (command === 'type') {
-    const arg = rest.join('');
-    if (builtinCommands.has(arg)) {
-      console.log(`${arg} is a shell builtin`);
+    const spaceIndex = input.indexOf(' ');
+    let command = '';
+    let argsString = '';
+    if (spaceIndex === -1) {
+      command = input;
     } else {
-      console.log(`${arg}: not found`);
+      command = input.slice(0, spaceIndex);
+      argsString = input.slice(spaceIndex + 1);
     }
-    continue;
+
+    const commandFunction = commandsMap.get(command);
+
+    if (!commandFunction) {
+      console.log(`${command}: command not found`);
+      continue;
+    }
+
+    commandFunction(argsString);
+  }
+}
+
+main();
+
+// ==================
+// Command Functions
+// ==================
+
+function exit() {
+  rl.close();
+  state.rlOpen = false;
+}
+
+function echo(argsString: string) {
+  console.log(argsString);
+}
+
+function type(argsString: string) {
+  if (!commandsMap.has(argsString)) {
+    console.log(`${argsString}: not found`);
+    return;
   }
 
-  console.log(`${command}: command not found`);
+  console.log(`${argsString} is a shell builtin`);
 }
