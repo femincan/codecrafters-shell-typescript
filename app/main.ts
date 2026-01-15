@@ -1,6 +1,12 @@
 import { createInterface } from 'node:readline/promises';
 
 // ==================
+// Types
+// ==================
+type CommandName = string;
+type CommandFunction = (rest: string) => void;
+
+// ==================
 // Globals
 // ==================
 
@@ -11,13 +17,8 @@ const rl = createInterface({
 
 const state = {
   rlOpen: true,
+  commandsMap: new Map<CommandName, CommandFunction>(),
 };
-
-const commandsMap = new Map([
-  ['exit', exit],
-  ['echo', echo],
-  ['type', type],
-]);
 
 // ==================
 // Main Function
@@ -29,22 +30,22 @@ async function main() {
 
     const spaceIndex = input.indexOf(' ');
     let command = '';
-    let argsString = '';
+    let rest = '';
     if (spaceIndex === -1) {
       command = input;
     } else {
       command = input.slice(0, spaceIndex);
-      argsString = input.slice(spaceIndex + 1);
+      rest = input.slice(spaceIndex + 1);
     }
 
-    const commandFunction = commandsMap.get(command);
+    const commandFunction = state.commandsMap.get(command);
 
     if (!commandFunction) {
       console.log(`${command}: command not found`);
       continue;
     }
 
-    commandFunction(argsString);
+    commandFunction(rest);
   }
 }
 
@@ -54,20 +55,28 @@ main();
 // Command Functions
 // ==================
 
-function exit() {
+// exit
+createCommand('exit', () => {
   rl.close();
   state.rlOpen = false;
-}
+});
 
-function echo(argsString: string) {
-  console.log(argsString);
-}
+// echo
+createCommand('echo', (rest) => console.log(rest));
 
-function type(argsString: string) {
-  if (!commandsMap.has(argsString)) {
-    console.log(`${argsString}: not found`);
-    return;
-  }
+// type
+createCommand('type', (rest) =>
+  console.log(
+    `${rest}${
+      state.commandsMap.has(rest) ? ' is a shell builtin' : ': not found'
+    }`
+  )
+);
 
-  console.log(`${argsString} is a shell builtin`);
+// ==================
+// Utility Functions
+// ==================
+
+function createCommand(name: CommandName, func: CommandFunction) {
+  state.commandsMap.set(name, func);
 }
