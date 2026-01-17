@@ -97,7 +97,7 @@ function createCommand(name: CommandName, func: CommandFunction) {
 
 function findExe(exeName: string) {
   const pathDirs = (process.env.PATH || process.env.Path || '').split(
-    delimiter
+    delimiter,
   );
 
   for (const dir of pathDirs) {
