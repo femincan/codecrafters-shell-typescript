@@ -1,4 +1,11 @@
 import { createInterface } from 'node:readline/promises';
+import { delimiter, resolve } from 'node:path';
+import {
+  accessSync,
+  constants as fsConstants,
+  existsSync,
+  readdirSync,
+} from 'node:fs';
 
 // ==================
 // Types
@@ -65,13 +72,20 @@ createCommand('exit', () => {
 createCommand('echo', (rest) => console.log(rest));
 
 // type
-createCommand('type', (rest) =>
-  console.log(
-    `${rest}${
-      state.commandsMap.has(rest) ? ' is a shell builtin' : ': not found'
-    }`
-  )
-);
+createCommand('type', (rest) => {
+  if (state.commandsMap.has(rest)) {
+    console.log(`${rest} is a shell builtin`);
+    return;
+  }
+
+  const exePath = findExe(rest);
+  if (exePath) {
+    console.log(`${rest} is ${exePath}`);
+    return;
+  }
+
+  console.log(`${rest}: not found`);
+});
 
 // ==================
 // Utility Functions
@@ -79,4 +93,33 @@ createCommand('type', (rest) =>
 
 function createCommand(name: CommandName, func: CommandFunction) {
   state.commandsMap.set(name, func);
+}
+
+function findExe(exeName: string) {
+  const pathDirs = (process.env.PATH || process.env.Path || '').split(
+    delimiter
+  );
+
+  for (const dir of pathDirs) {
+    if (!existsSync(dir)) continue;
+
+    const files = readdirSync(dir);
+    if (files.includes(exeName)) {
+      const filePath = resolve(dir, exeName);
+      if (isExecutable(filePath)) {
+        return filePath;
+      }
+    }
+  }
+
+  return null;
+}
+
+function isExecutable(filePath: string) {
+  try {
+    accessSync(filePath, fsConstants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
