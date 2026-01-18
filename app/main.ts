@@ -6,6 +6,7 @@ import {
   existsSync,
   readdirSync,
 } from 'node:fs';
+import { exec } from 'node:child_process';
 
 // ==================
 // Types
@@ -47,8 +48,14 @@ async function main() {
 
     const commandFunction = state.commandsMap.get(command);
 
+    // If the command isn't built-in try to find exe with this command name and execute it
     if (!commandFunction) {
-      console.log(`${command}: command not found`);
+      const result = await runExe(command, rest);
+
+      if (!result.success) {
+        console.log(result.message);
+      }
+
       continue;
     }
 
@@ -86,6 +93,31 @@ createCommand('type', (rest) => {
 
   console.log(`${rest}: not found`);
 });
+
+// ==================
+// Run executable
+// ==================
+
+async function runExe(
+  command: string,
+  rest: string,
+): Promise<{ success: true } | { success: false; message: string }> {
+  const exePath = findExe(command);
+
+  if (!exePath) {
+    return { success: false, message: `${command}: command not found` };
+  }
+
+  const subprocess = exec(`${command} ${rest}`);
+
+  if (subprocess.stdout) {
+    for await (const chunk of subprocess.stdout) {
+      process.stdout.write(chunk);
+    }
+  }
+
+  return { success: true };
+}
 
 // ==================
 // Utility Functions
