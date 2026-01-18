@@ -11,6 +11,7 @@ import { exec } from 'node:child_process';
 // ==================
 // Types
 // ==================
+
 type CommandName = string;
 type CommandFunction = (rest: string) => void;
 
