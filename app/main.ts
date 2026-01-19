@@ -92,6 +92,15 @@ createCommand('pwd', () => {
   console.log(process.cwd());
 });
 
+// cd
+createCommand('cd', (rest) => {
+  try {
+    process.chdir(rest);
+  } catch {
+    console.log(`cd: ${rest}: No such file or directory`);
+  }
+});
+
 // ==================
 // Run executable
 // ==================
