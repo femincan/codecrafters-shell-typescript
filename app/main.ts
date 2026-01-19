@@ -105,7 +105,7 @@ async function runExe(
 
   if (subprocess.stdout) {
     for await (const chunk of subprocess.stdout) {
-      process.stdout.write(chunk);
+      Bun.stdout.write(chunk);
     }
   }
 
@@ -125,9 +125,7 @@ function createCommand(name: CommandName, func: CommandFunction) {
 }
 
 function findExe(exeName: string) {
-  const pathDirs = (process.env.PATH || process.env.Path || '').split(
-    delimiter,
-  );
+  const pathDirs = (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
 
   for (const dir of pathDirs) {
     if (!existsSync(dir)) continue;
