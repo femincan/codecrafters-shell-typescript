@@ -112,7 +112,6 @@ createCommand('echo', (rest) => {
     singleQuotePairIndexes.push([i]);
   }
 
-  let beforeRemoveSpaces = localRest;
   localRest = localRest.replaceAll(/\s+|['"]/g, (match, offset) => {
     if (["'", '"'].includes(match)) {
       const isPartOfQuotePair = [
