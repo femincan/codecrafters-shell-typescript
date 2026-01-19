@@ -72,36 +72,78 @@ createCommand('exit', () => {
 createCommand('echo', (rest) => {
   let localRest = rest;
 
-  const quotePairIndexes: number[][] = [];
+  const doubleQuotePairIndexes: number[][] = [];
   for (let i = 0; i < localRest.length; i++) {
     const char = localRest[i];
 
-    if (char !== "'") continue;
+    if (char !== '"') continue;
 
-    const lastPair = quotePairIndexes.at(-1);
+    const lastPair = doubleQuotePairIndexes.at(-1);
     if (lastPair && lastPair.length !== 2) {
       lastPair.push(i);
       continue;
     }
 
-    quotePairIndexes.push([i]);
+    doubleQuotePairIndexes.push([i]);
   }
 
-  localRest = localRest.replaceAll(/\s+/g, (match, offset) => {
-    const isBetweenQuotes = quotePairIndexes.some(([startIdx, endIdx]) => {
-      if (startIdx === undefined || endIdx === undefined) return false;
+  const singleQuotePairIndexes: number[][] = [];
+  for (let i = 0; i < localRest.length; i++) {
+    const char = localRest[i];
 
-      return startIdx < offset && offset < endIdx;
-    });
+    if (char !== "'") continue;
 
-    if (isBetweenQuotes) {
-      return match;
+    const isBetweenDoubleQuotes = doubleQuotePairIndexes.some(
+      ([startIdx, endIdx]) => {
+        if (startIdx === undefined || endIdx === undefined) return false;
+
+        return startIdx < i && i < endIdx;
+      },
+    );
+
+    if (isBetweenDoubleQuotes) continue;
+
+    const lastPair = singleQuotePairIndexes.at(-1);
+    if (lastPair && lastPair.length !== 2) {
+      lastPair.push(i);
+      continue;
     }
 
-    return ' ';
-  });
+    singleQuotePairIndexes.push([i]);
+  }
 
-  localRest = localRest.replaceAll("'", '');
+  let beforeRemoveSpaces = localRest;
+  localRest = localRest.replaceAll(/\s+|['"]/g, (match, offset) => {
+    if (["'", '"'].includes(match)) {
+      const isPartOfQuotePair = [
+        ...doubleQuotePairIndexes,
+        ...singleQuotePairIndexes,
+      ]
+        .flat()
+        .includes(offset);
+
+      if (isPartOfQuotePair) {
+        return '';
+      }
+
+      return match;
+    } else {
+      const isBetweenQuotes = [
+        ...doubleQuotePairIndexes,
+        ...singleQuotePairIndexes,
+      ].some(([startIdx, endIdx]) => {
+        if (startIdx === undefined || endIdx === undefined) return false;
+
+        return startIdx < offset && offset < endIdx;
+      });
+
+      if (isBetweenQuotes) {
+        return match;
+      }
+
+      return ' ';
+    }
+  });
 
   console.log(localRest);
 });
