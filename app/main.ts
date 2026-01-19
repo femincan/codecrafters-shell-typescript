@@ -176,4 +176,6 @@ function deleteSingleQuotes(input: string) {
   if (input.startsWith("'") && input.endsWith("'")) {
     return input.slice(1, -1);
   }
+
+  return input;
 }
