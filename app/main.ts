@@ -20,9 +20,7 @@ type CommandFunction = (rest: string) => void;
 
 const PROMPT = '$ ';
 
-const state = {
-  commandsMap: new Map<CommandName, CommandFunction>(),
-};
+const commandsMap = new Map<CommandName, CommandFunction>();
 
 // ==================
 // Main Function
@@ -42,7 +40,7 @@ async function main() {
       rest = input.slice(spaceIndex + 1);
     }
 
-    const commandFunction = state.commandsMap.get(command);
+    const commandFunction = commandsMap.get(command);
 
     // If the command isn't built-in try to find exe with this command name and execute it
     if (commandFunction) {
@@ -75,7 +73,7 @@ createCommand('echo', (rest) => console.log(rest));
 
 // type
 createCommand('type', (rest) => {
-  if (state.commandsMap.has(rest)) {
+  if (commandsMap.has(rest)) {
     console.log(`${rest} is a shell builtin`);
     return;
   }
@@ -123,7 +121,7 @@ function printPrompt() {
 }
 
 function createCommand(name: CommandName, func: CommandFunction) {
-  state.commandsMap.set(name, func);
+  commandsMap.set(name, func);
 }
 
 function findExe(exeName: string) {
