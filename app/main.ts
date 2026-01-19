@@ -87,6 +87,11 @@ createCommand('type', (rest) => {
   console.log(`${rest}: not found`);
 });
 
+// pwd
+createCommand('pwd', () => {
+  console.log(process.cwd());
+});
+
 // ==================
 // Run executable
 // ==================
