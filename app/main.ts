@@ -69,7 +69,9 @@ createCommand('exit', () => {
 });
 
 // echo
-createCommand('echo', (rest) => console.log(rest));
+createCommand('echo', (rest) => {
+  console.log(deleteSingleQuotes(rest));
+});
 
 // type
 createCommand('type', (rest) => {
@@ -167,5 +169,11 @@ function isExecutable(filePath: string) {
     return true;
   } catch {
     return false;
+  }
+}
+
+function deleteSingleQuotes(input: string) {
+  if (input.startsWith("'") && input.endsWith("'")) {
+    return input.slice(1, -1);
   }
 }
