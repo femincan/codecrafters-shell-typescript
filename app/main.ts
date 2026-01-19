@@ -1,4 +1,3 @@
-import { createInterface } from 'node:readline/promises';
 import { delimiter, resolve } from 'node:path';
 import {
   accessSync,
@@ -19,13 +18,9 @@ type CommandFunction = (rest: string) => void;
 // Globals
 // ==================
 
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+const PROMPT = '$ ';
 
 const state = {
-  rlOpen: true,
   commandsMap: new Map<CommandName, CommandFunction>(),
 };
 
@@ -34,9 +29,9 @@ const state = {
 // ==================
 
 async function main() {
-  while (state.rlOpen) {
-    const input = await rl.question('$ ');
+  printPrompt();
 
+  for await (const input of console) {
     const spaceIndex = input.indexOf(' ');
     let command = '';
     let rest = '';
@@ -50,17 +45,17 @@ async function main() {
     const commandFunction = state.commandsMap.get(command);
 
     // If the command isn't built-in try to find exe with this command name and execute it
-    if (!commandFunction) {
+    if (commandFunction) {
+      commandFunction(rest);
+    } else {
       const result = await runExe(command, rest);
 
       if (!result.success) {
         console.log(result.message);
       }
-
-      continue;
     }
 
-    commandFunction(rest);
+    printPrompt();
   }
 }
 
@@ -72,8 +67,7 @@ main();
 
 // exit
 createCommand('exit', () => {
-  rl.close();
-  state.rlOpen = false;
+  process.exit(0);
 });
 
 // echo
@@ -123,6 +117,10 @@ async function runExe(
 // ==================
 // Utility Functions
 // ==================
+
+function printPrompt() {
+  Bun.stdout.write(PROMPT);
+}
 
 function createCommand(name: CommandName, func: CommandFunction) {
   state.commandsMap.set(name, func);
