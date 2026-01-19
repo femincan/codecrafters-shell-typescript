@@ -70,7 +70,40 @@ createCommand('exit', () => {
 
 // echo
 createCommand('echo', (rest) => {
-  console.log(deleteSingleQuotes(rest));
+  let localRest = rest;
+
+  const quotePairIndexes: number[][] = [];
+  for (let i = 0; i < localRest.length; i++) {
+    const char = localRest[i];
+
+    if (char !== "'") continue;
+
+    const lastPair = quotePairIndexes.at(-1);
+    if (lastPair && lastPair.length !== 2) {
+      lastPair.push(i);
+      continue;
+    }
+
+    quotePairIndexes.push([i]);
+  }
+
+  localRest = localRest.replaceAll(/\s+/g, (match, offset) => {
+    const isBetweenQuotes = quotePairIndexes.some(([startIdx, endIdx]) => {
+      if (startIdx === undefined || endIdx === undefined) return false;
+
+      return startIdx < offset && offset < endIdx;
+    });
+
+    if (isBetweenQuotes) {
+      return match;
+    }
+
+    return ' ';
+  });
+
+  localRest = localRest.replaceAll("'", '');
+
+  console.log(localRest);
 });
 
 // type
@@ -170,12 +203,4 @@ function isExecutable(filePath: string) {
   } catch {
     return false;
   }
-}
-
-function deleteSingleQuotes(input: string) {
-  if (input.startsWith("'") && input.endsWith("'")) {
-    return input.slice(1, -1);
-  }
-
-  return input;
 }
