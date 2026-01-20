@@ -77,6 +77,7 @@ createCommand('echo', (rest) => {
     const char = localRest[i];
 
     if (char !== '"') continue;
+    if (localRest[i - 1] === '\\') continue;
 
     const lastPair = doubleQuotePairIndexes.at(-1);
     if (lastPair && lastPair.length !== 2) {
@@ -92,6 +93,7 @@ createCommand('echo', (rest) => {
     const char = localRest[i];
 
     if (char !== "'") continue;
+    if (localRest[i - 1] === '\\') continue;
 
     const isBetweenDoubleQuotes = doubleQuotePairIndexes.some(
       ([startIdx, endIdx]) => {
@@ -112,7 +114,7 @@ createCommand('echo', (rest) => {
     singleQuotePairIndexes.push([i]);
   }
 
-  localRest = localRest.replaceAll(/\s+|['"]/g, (match, offset) => {
+  localRest = localRest.replaceAll(/\s+|['"]|\\/g, (match, offset) => {
     if (["'", '"'].includes(match)) {
       const isPartOfQuotePair = [
         ...doubleQuotePairIndexes,
@@ -126,6 +128,8 @@ createCommand('echo', (rest) => {
       }
 
       return match;
+    } else if (match === '\\') {
+      return '';
     } else {
       const isBetweenQuotes = [
         ...doubleQuotePairIndexes,
