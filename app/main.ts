@@ -72,12 +72,23 @@ createCommand('exit', () => {
 createCommand('echo', (rest) => {
   let localRest = rest;
 
+  const charsToEscape = new Set(["'", '"', '\\', '$', '`', '\n']);
+  const escapedCharIndexes = new Set<number>();
+  for (let i = 0; i < localRest.length; i++) {
+    const char = localRest[i];
+
+    if (char !== '\\' || escapedCharIndexes.has(i)) continue;
+
+    if (charsToEscape.has(localRest[i + 1] || '')) {
+      escapedCharIndexes.add(i + 1);
+    }
+  }
+
   const doubleQuotePairIndexes: number[][] = [];
   for (let i = 0; i < localRest.length; i++) {
     const char = localRest[i];
 
-    if (char !== '"') continue;
-    if (localRest[i - 1] === '\\') continue;
+    if (char !== '"' || escapedCharIndexes.has(i)) continue;
 
     const lastPair = doubleQuotePairIndexes.at(-1);
     if (lastPair && lastPair.length !== 2) {
@@ -92,8 +103,7 @@ createCommand('echo', (rest) => {
   for (let i = 0; i < localRest.length; i++) {
     const char = localRest[i];
 
-    if (char !== "'") continue;
-    if (localRest[i - 1] === '\\') continue;
+    if (char !== "'" || escapedCharIndexes.has(i)) continue;
 
     const isBetweenDoubleQuotes = doubleQuotePairIndexes.some(
       ([startIdx, endIdx]) => {
@@ -115,6 +125,8 @@ createCommand('echo', (rest) => {
   }
 
   localRest = localRest.replaceAll(/\s+|['"\\]/g, (match, offset) => {
+    if (escapedCharIndexes.has(offset)) return match;
+
     if (["'", '"'].includes(match)) {
       const isPartOfQuotePair = [
         ...doubleQuotePairIndexes,
@@ -129,10 +141,6 @@ createCommand('echo', (rest) => {
 
       return match;
     } else if (match === '\\') {
-      if (localRest[offset - 1] === '\\' || localRest[offset + 1] === '\\') {
-        return match;
-      }
-
       const isBetweenSingleQuotes = singleQuotePairIndexes.some(
         ([startIdx, endIdx]) => {
           if (startIdx === undefined || endIdx === undefined) return false;
