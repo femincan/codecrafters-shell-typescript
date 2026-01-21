@@ -114,7 +114,7 @@ createCommand('echo', (rest) => {
     singleQuotePairIndexes.push([i]);
   }
 
-  localRest = localRest.replaceAll(/\s+|['"]|\\/g, (match, offset) => {
+  localRest = localRest.replaceAll(/\s+|['"\\]/g, (match, offset) => {
     if (["'", '"'].includes(match)) {
       const isPartOfQuotePair = [
         ...doubleQuotePairIndexes,
@@ -129,6 +129,22 @@ createCommand('echo', (rest) => {
 
       return match;
     } else if (match === '\\') {
+      if (localRest[offset - 1] === '\\' || localRest[offset + 1] === '\\') {
+        return match;
+      }
+
+      const isBetweenSingleQuotes = singleQuotePairIndexes.some(
+        ([startIdx, endIdx]) => {
+          if (startIdx === undefined || endIdx === undefined) return false;
+
+          return startIdx < offset && offset < endIdx;
+        },
+      );
+
+      if (isBetweenSingleQuotes) {
+        return match;
+      }
+
       return '';
     } else {
       const isBetweenQuotes = [
