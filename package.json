@@ -3,7 +3,7 @@
   "description": "A shell built with TypeScript",
   "type": "module",
   "scripts": {
-    "dev": "bun run app/main.ts"
+    "dev": "bun run src/main.ts"
   },
   "devDependencies": {
     "@types/bun": "^1.3.6"
