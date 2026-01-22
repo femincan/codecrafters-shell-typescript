@@ -1,3 +1,3 @@
 # codecrafters-shell-typescript
 
-This is the code for the challange ["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview) from [codecrafters.io](https://codecrafters.io).
+This is a shell implementation written in TypeScript, developed as part of the [**Build Your Own Shell**](https://app.codecrafters.io/courses/shell/overview) challenge.
