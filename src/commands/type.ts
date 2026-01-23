@@ -1,5 +1,5 @@
 import { commandsMap, createCommand } from '@/lib/command';
-import { findExe } from '@/lib/exe';
+import { getExePath } from '@/lib/exe';
 
 createCommand('type', (rest) => {
   if (commandsMap.has(rest)) {
@@ -7,7 +7,7 @@ createCommand('type', (rest) => {
     return;
   }
 
-  const exePath = findExe(rest);
+  const exePath = getExePath(rest);
   if (exePath) {
     console.log(`${rest} is ${exePath}`);
     return;

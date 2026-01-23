@@ -7,7 +7,7 @@ export async function runExe(
   command: string,
   rest: string,
 ): Promise<{ success: true } | { success: false; message: string }> {
-  const exePath = findExe(command);
+  const exePath = getExePath(command);
 
   if (!exePath) {
     return { success: false, message: `${command}: command not found` };
@@ -24,7 +24,7 @@ export async function runExe(
   return { success: true };
 }
 
-export function findExe(exeName: string) {
+export function getExePath(exeName: string) {
   const pathDirs = (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
 
   for (const dir of pathDirs) {
