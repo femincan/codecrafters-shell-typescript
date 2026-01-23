@@ -2,7 +2,7 @@ import { commandsMap } from './lib/command';
 import { runExe } from './lib/exe';
 import { printPrompt } from './lib/utils';
 
-async function main() {
+export default async function main() {
   printPrompt();
 
   for await (const input of console) {
@@ -32,5 +32,3 @@ async function main() {
     printPrompt();
   }
 }
-
-main();
