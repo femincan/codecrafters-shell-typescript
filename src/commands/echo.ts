@@ -1,23 +1,21 @@
 import { createCommand } from '@/lib/command';
 
 createCommand('echo', (rest) => {
-  let localRest = rest;
-
   const charsToEscape = new Set(["'", '"', '\\', '$', '`', '\n']);
   const escapedCharIndexes = new Set<number>();
-  for (let i = 0; i < localRest.length; i++) {
-    const char = localRest[i];
+  for (let i = 0; i < rest.length; i++) {
+    const char = rest[i];
 
     if (char !== '\\' || escapedCharIndexes.has(i)) continue;
 
-    if (charsToEscape.has(localRest[i + 1] || '')) {
+    if (charsToEscape.has(rest[i + 1] || '')) {
       escapedCharIndexes.add(i + 1);
     }
   }
 
   const doubleQuotePairIndexes: number[][] = [];
-  for (let i = 0; i < localRest.length; i++) {
-    const char = localRest[i];
+  for (let i = 0; i < rest.length; i++) {
+    const char = rest[i];
 
     if (char !== '"' || escapedCharIndexes.has(i)) continue;
 
@@ -31,8 +29,8 @@ createCommand('echo', (rest) => {
   }
 
   const singleQuotePairIndexes: number[][] = [];
-  for (let i = 0; i < localRest.length; i++) {
-    const char = localRest[i];
+  for (let i = 0; i < rest.length; i++) {
+    const char = rest[i];
 
     if (char !== "'" || escapedCharIndexes.has(i)) continue;
 
@@ -55,7 +53,7 @@ createCommand('echo', (rest) => {
     singleQuotePairIndexes.push([i]);
   }
 
-  localRest = localRest.replaceAll(/\s+|['"\\]/g, (match, offset) => {
+  return rest.replaceAll(/\s+|['"\\]/g, (match, offset) => {
     if (escapedCharIndexes.has(offset)) return match;
 
     if (["'", '"'].includes(match)) {
@@ -102,6 +100,4 @@ createCommand('echo', (rest) => {
       return ' ';
     }
   });
-
-  console.log(localRest);
 });
