@@ -3,14 +3,12 @@ import { existsSync, readdirSync } from 'node:fs';
 import { delimiter, resolve } from 'node:path';
 import { isExecutable } from './utils';
 
-export async function runExe(
-  command: string,
-  rest: string,
-): Promise<{ success: true } | { success: false; message: string }> {
+export async function runExe(command: string, rest: string) {
   const exePath = getExePath(command);
 
   if (!exePath) {
-    return { success: false, message: `${command}: command not found` };
+    console.log(`${command}: command not found`);
+    return;
   }
 
   const subprocess = exec(`${command} ${rest}`);
@@ -20,8 +18,6 @@ export async function runExe(
       Bun.stdout.write(chunk);
     }
   }
-
-  return { success: true };
 }
 
 export function getExePath(exeName: string) {

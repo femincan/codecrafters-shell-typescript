@@ -18,15 +18,10 @@ export default async function main() {
 
     const commandFunction = commandsMap.get(command);
 
-    // If the command isn't built-in try to find exe with this command name and execute it
     if (commandFunction) {
       commandFunction(rest);
     } else {
-      const result = await runExe(command, rest);
-
-      if (!result.success) {
-        console.log(result.message);
-      }
+      await runExe(command, rest);
     }
 
     printPrompt();
