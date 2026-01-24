@@ -2,8 +2,8 @@ type Pair = [number, number?];
 
 export function processQuotes(str: string) {
   const escapedChars = getEscapedChars(str);
-  const doubleQuotePairs = getPairs(str, escapedChars);
-  const singleQuotePairs = getPairs(str, escapedChars, doubleQuotePairs);
+  const doubleQuotePairs = getPairs(str, '"', escapedChars);
+  const singleQuotePairs = getPairs(str, "'", escapedChars, doubleQuotePairs);
   const cleanStr = cleanUpSpecialChars(
     str,
     escapedChars,
@@ -76,13 +76,18 @@ function cleanUpSpecialChars(
   });
 }
 
-function getPairs(str: string, escapedChars: Set<number>, priorPair?: Pair[]) {
+function getPairs(
+  str: string,
+  targetChar: string,
+  escapedChars: Set<number>,
+  priorPair?: Pair[],
+) {
   const pairs: Pair[] = [];
 
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
 
-    if (char !== "'" || escapedChars.has(i)) continue;
+    if (char !== targetChar || escapedChars.has(i)) continue;
 
     if (priorPair) {
       const isBetweenPriorPair = isBetweenPair(priorPair, i);
