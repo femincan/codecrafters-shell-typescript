@@ -1,7 +1,11 @@
 import { exec } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
+import {
+  accessSync,
+  existsSync,
+  constants as fsConstants,
+  readdirSync,
+} from 'node:fs';
 import { delimiter, resolve } from 'node:path';
-import { isExecutable } from './utils';
 
 export async function runExe(command: string, rest: string) {
   const exePath = getExePath(command);
@@ -36,4 +40,13 @@ export function getExePath(exeName: string) {
   }
 
   return null;
+}
+
+function isExecutable(filePath: string) {
+  try {
+    accessSync(filePath, fsConstants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
