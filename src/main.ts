@@ -1,6 +1,5 @@
 import { commandsMap } from './lib/command';
 import { runExe } from './lib/exe';
-import { printPrompt } from './lib/utils';
 
 export default async function main() {
   printPrompt();
@@ -26,4 +25,8 @@ export default async function main() {
 
     printPrompt();
   }
+}
+
+function printPrompt() {
+  Bun.stdout.write('$ ');
 }
