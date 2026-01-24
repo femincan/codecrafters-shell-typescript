@@ -1,5 +1,5 @@
-export type CommandName = string;
-export type CommandFunction = (rest: string) => void;
+type CommandName = string;
+type CommandFunction = (rest: string) => void;
 
 export const commandsMap = new Map<CommandName, CommandFunction>();
 
