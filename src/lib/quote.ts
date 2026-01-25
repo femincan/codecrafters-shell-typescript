@@ -2,8 +2,20 @@ type Pair = [number, number?];
 
 export function processQuotes(str: string) {
   const escapedChars = getEscapedChars(str);
-  const doubleQuotePairs = getPairs(str, '"', escapedChars);
-  const singleQuotePairs = getPairs(str, "'", escapedChars, doubleQuotePairs);
+  const allDoubleQuotePairs = getPairs(str, '"', escapedChars);
+  const allSingleQuotePairs = getPairs(str, "'", escapedChars);
+  const doubleQuotePairs = getPairs(
+    str,
+    '"',
+    escapedChars,
+    allSingleQuotePairs,
+  );
+  const singleQuotePairs = getPairs(
+    str,
+    "'",
+    escapedChars,
+    allDoubleQuotePairs,
+  );
   const cleanStr = cleanUpSpecialChars(
     str,
     escapedChars,
