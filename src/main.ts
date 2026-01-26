@@ -1,7 +1,8 @@
-import { commandsMap } from './lib/command';
+import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
 
 export default async function main() {
+  await loadCommands();
   printPrompt();
 
   for await (const input of console) {
