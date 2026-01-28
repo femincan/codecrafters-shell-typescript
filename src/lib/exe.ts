@@ -1,4 +1,3 @@
-import { exec } from 'node:child_process';
 import {
   accessSync,
   existsSync,
@@ -7,7 +6,7 @@ import {
 } from 'node:fs';
 import { delimiter, resolve } from 'node:path';
 
-export async function runExe(command: string, rest: string) {
+export async function runExe(command: string, args: string[]) {
   const exePath = getExePath(command);
 
   if (!exePath) {
@@ -15,7 +14,7 @@ export async function runExe(command: string, rest: string) {
     return;
   }
 
-  const subprocess = exec(`${command} ${rest}`);
+  const subprocess = Bun.spawn([command, ...args], {});
 
   if (subprocess.stdout) {
     for await (const chunk of subprocess.stdout) {
