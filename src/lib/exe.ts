@@ -14,12 +14,10 @@ export async function runExe(command: string, args: string[]) {
     return;
   }
 
-  const subprocess = Bun.spawn([command, ...args], {});
+  const subprocess = Bun.spawn([command, ...args]);
 
-  if (subprocess.stdout) {
-    for await (const chunk of subprocess.stdout) {
-      Bun.stdout.write(chunk);
-    }
+  for await (const chunk of subprocess.stdout) {
+    Bun.stdout.write(chunk);
   }
 }
 
