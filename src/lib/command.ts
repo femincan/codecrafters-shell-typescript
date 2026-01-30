@@ -2,7 +2,7 @@ import { readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 type CommandName = string;
-type CommandFunction = (rest: string) => void;
+type CommandFunction = (args: string[]) => void;
 
 export const commandsMap = new Map<CommandName, CommandFunction>();
 

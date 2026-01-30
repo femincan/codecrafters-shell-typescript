@@ -12,7 +12,7 @@ export default async function main() {
     const commandFunction = commandsMap.get(command);
 
     if (commandFunction) {
-      commandFunction(args.join(' '));
+      commandFunction(args);
     } else {
       await runExe(command, args);
     }

@@ -1,5 +1,5 @@
 import { createCommand } from '@/lib/command';
 
-createCommand('echo', (rest: string) => {
-  console.log(rest);
+createCommand('echo', (args) => {
+  console.log(args.join(' '));
 });

@@ -1,17 +1,19 @@
 import { commandsMap, createCommand } from '@/lib/command';
 import { getExePath } from '@/lib/exe';
 
-createCommand('type', (rest) => {
-  if (commandsMap.has(rest)) {
-    console.log(`${rest} is a shell builtin`);
+createCommand('type', (args) => {
+  const command = args[0] || '';
+
+  if (commandsMap.has(command)) {
+    console.log(`${command} is a shell builtin`);
     return;
   }
 
-  const exePath = getExePath(rest);
+  const exePath = getExePath(command);
   if (exePath) {
-    console.log(`${rest} is ${exePath}`);
+    console.log(`${command} is ${exePath}`);
     return;
   }
 
-  console.log(`${rest}: not found`);
+  console.log(`${command}: not found`);
 });
