@@ -1,5 +1,6 @@
 import { createCommand } from '@/lib/command';
+import { stringToStream } from '@/lib/utils';
 
 createCommand('echo', (args) => {
-  console.log(args.join(' '));
+  return { stdout: stringToStream(args.join(' ')) };
 });

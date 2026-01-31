@@ -1,5 +1,6 @@
 import { createCommand } from '@/lib/command';
+import { stringToStream } from '@/lib/utils';
 
 createCommand('pwd', () => {
-  console.log(process.cwd());
+  return { stdout: stringToStream(process.cwd()) };
 });

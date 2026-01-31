@@ -1,8 +1,9 @@
 import { readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type { CommandOutput } from './types';
 
 type CommandName = string;
-type CommandFunction = (args: string[]) => void;
+type CommandFunction = (args: string[]) => CommandOutput;
 
 export const commandsMap = new Map<CommandName, CommandFunction>();
 

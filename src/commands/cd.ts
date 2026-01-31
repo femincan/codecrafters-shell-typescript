@@ -1,4 +1,5 @@
 import { createCommand } from '@/lib/command';
+import { stringToStream } from '@/lib/utils';
 
 createCommand('cd', (args) => {
   const targetLoc = args[0] || '';
@@ -11,6 +12,10 @@ createCommand('cd', (args) => {
   try {
     process.chdir(dir);
   } catch {
-    console.log(`cd: ${targetLoc}: No such file or directory`);
+    return {
+      stderr: stringToStream(`cd: ${targetLoc}: No such file or directory`),
+    };
   }
+
+  return {};
 });
