@@ -6,6 +6,7 @@ import {
 } from 'node:fs';
 import { delimiter, resolve } from 'node:path';
 import type { CommandOutput } from './types';
+import { stringToStream } from './utils';
 
 export async function runExe(
   command: string,
@@ -15,7 +16,7 @@ export async function runExe(
 
   if (!exePath) {
     return {
-      stderr: new Response(`${command}: command not found`).body!,
+      stderr: stringToStream(`${command}: command not found`),
     };
   }
 
