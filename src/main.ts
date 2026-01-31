@@ -48,7 +48,6 @@ async function redirectOutput(
   redirect: NonNullable<ReturnType<typeof parseInput>['redirect']>,
 ) {
   const redirectStream = output[redirect.type];
-  if (!redirectStream) return;
 
   let fileDescriptor;
   if (redirect.override) {
