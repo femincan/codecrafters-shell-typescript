@@ -1,26 +1,82 @@
 import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { parseInput } from './lib/input';
+import type { CommandOutput, StdStream } from './lib/types';
+import { chunkToString } from './lib/utils';
 
 export default async function main() {
   await loadCommands();
-  printPrompt();
+  await printPrompt();
 
   for await (const input of console) {
-    const { command, args } = parseInput(input);
+    const { command, args, redirect } = parseInput(input);
 
     const commandFunction = commandsMap.get(command);
 
+    let output;
     if (commandFunction) {
-      commandFunction(args);
+      output = commandFunction(args);
     } else {
-      await runExe(command, args);
+      output = await runExe(command, args);
     }
 
-    printPrompt();
+    if (redirect) {
+      await redirectOutput(output, redirect);
+
+      if (redirect.type === 'stdout' && output.stderr) {
+        await printStdStream(output.stderr, 'stderr');
+      }
+
+      if (redirect.type === 'stderr' && output.stdout) {
+        await printStdStream(output.stdout, 'stdout');
+      }
+    } else {
+      await printOutput(output);
+    }
+
+    await printPrompt();
   }
 }
 
-function printPrompt() {
-  Bun.stdout.write('$ ');
+async function printPrompt() {
+  await Bun.stdout.write('$ ');
+}
+
+async function redirectOutput(
+  output: CommandOutput,
+  redirect: NonNullable<ReturnType<typeof parseInput>['redirect']>,
+) {
+  const redirectResponse = output[redirect.type];
+  if (!redirectResponse) return;
+
+  const file = Bun.file(redirect.targetFile);
+  for await (const chunk of redirectResponse) {
+    await file.write(chunk);
+  }
+}
+
+async function printOutput({ stdout, stderr }: CommandOutput) {
+  if (stdout) {
+    await printStdStream(stdout, 'stdout');
+  }
+
+  if (stderr) {
+    await printStdStream(stderr, 'stderr');
+  }
+}
+
+async function printStdStream(stream: StdStream, type: 'stdout' | 'stderr') {
+  let lastChunk = null;
+  for await (const chunk of stream) {
+    const chunkStr = chunkToString(chunk);
+
+    if (chunkStr.length) {
+      await Bun[type].write(chunkStr);
+      lastChunk = chunkStr;
+    }
+  }
+
+  if (lastChunk && !lastChunk.endsWith('\n')) {
+    await Bun[type].write('\n');
+  }
 }

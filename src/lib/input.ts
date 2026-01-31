@@ -1,9 +1,24 @@
+type RedirectType = 'stdout' | 'stderr';
+
 export function parseInput(input: string) {
   const parsedArgs = parseArgs(input.trim());
+  const command = parsedArgs.shift() ?? '';
+  const redirectData = getRedirectTypeWithMode(parsedArgs.at(-2) ?? '');
+
+  if (redirectData && parsedArgs.length >= 2) {
+    return {
+      command,
+      args: parsedArgs.slice(0, -2),
+      redirect: {
+        ...redirectData,
+        targetFile: parsedArgs.at(-1)!,
+      },
+    };
+  }
 
   return {
-    command: parsedArgs[0] ?? '',
-    args: parsedArgs.slice(1),
+    command,
+    args: parsedArgs,
   };
 }
 
@@ -55,4 +70,27 @@ function parseArgs(argsStr: string) {
   }
 
   return args;
+}
+
+function getRedirectTypeWithMode(redirectStr: string): {
+  type: RedirectType;
+  override: boolean;
+} | null {
+  if (['1>', '>'].includes(redirectStr)) {
+    return { type: 'stdout', override: true };
+  }
+
+  if (['1>>', '>>'].includes(redirectStr)) {
+    return { type: 'stdout', override: false };
+  }
+
+  if (['2>'].includes(redirectStr)) {
+    return { type: 'stderr', override: true };
+  }
+
+  if (['2>>'].includes(redirectStr)) {
+    return { type: 'stderr', override: false };
+  }
+
+  return null;
 }
