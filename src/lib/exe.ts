@@ -5,20 +5,28 @@ import {
   readdirSync,
 } from 'node:fs';
 import { delimiter, resolve } from 'node:path';
+import type { CommandOutput } from './types';
 
-export async function runExe(command: string, args: string[]) {
+export async function runExe(
+  command: string,
+  args: string[],
+): Promise<CommandOutput> {
   const exePath = getExePath(command);
 
   if (!exePath) {
-    console.log(`${command}: command not found`);
-    return;
+    return {
+      stderr: new Response(`${command}: command not found`).body!,
+    };
   }
 
-  const subprocess = Bun.spawn([command, ...args]);
+  const subprocess = Bun.spawn([command, ...args], {
+    stderr: 'pipe',
+  });
 
-  for await (const chunk of subprocess.stdout) {
-    Bun.stdout.write(chunk);
-  }
+  return {
+    stdout: subprocess.stdout,
+    stderr: subprocess.stderr,
+  };
 }
 
 export function getExePath(exeName: string) {
