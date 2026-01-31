@@ -1,3 +1,4 @@
+import { open } from 'node:fs/promises';
 import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { parseInput } from './lib/input';
@@ -46,13 +47,21 @@ async function redirectOutput(
   output: CommandOutput,
   redirect: NonNullable<ReturnType<typeof parseInput>['redirect']>,
 ) {
-  const redirectResponse = output[redirect.type];
-  if (!redirectResponse) return;
+  const redirectStream = output[redirect.type];
+  if (!redirectStream) return;
 
-  const file = Bun.file(redirect.targetFile);
-  for await (const chunk of redirectResponse) {
-    await file.write(chunk);
+  let fileDescriptor;
+  if (redirect.override) {
+    fileDescriptor = await open(redirect.targetFile, 'w');
+  } else {
+    fileDescriptor = await open(redirect.targetFile, 'a');
   }
+
+  const writeStream = fileDescriptor.createWriteStream();
+  for await (const chunk of redirectStream) {
+    writeStream.write(chunk);
+  }
+  writeStream.end();
 }
 
 async function printOutput({ stdout, stderr }: CommandOutput) {
