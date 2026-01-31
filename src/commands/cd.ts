@@ -13,9 +13,10 @@ createCommand('cd', (args) => {
     process.chdir(dir);
   } catch {
     return {
+      stdout: stringToStream(''),
       stderr: stringToStream(`cd: ${targetLoc}: No such file or directory`),
     };
   }
 
-  return {};
+  return { stdout: stringToStream(''), stderr: stringToStream('') };
 });

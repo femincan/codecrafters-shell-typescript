@@ -16,6 +16,7 @@ export async function runExe(
 
   if (!exePath) {
     return {
+      stdout: stringToStream(''),
       stderr: stringToStream(`${command}: command not found`),
     };
   }
