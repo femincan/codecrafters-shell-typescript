@@ -1,8 +1,15 @@
+import type { WriteStream } from 'node:fs';
 import { open } from 'node:fs/promises';
+import type { ReadableStreamDefaultReader } from 'node:stream/web';
 import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { parseInput } from './lib/input';
-import type { CommandOutput, StdStream } from './lib/types';
+import type {
+  CommandOutput,
+  RedirectType,
+  StdOutput,
+  StdStream,
+} from './lib/types';
 import { valueToString } from './lib/utils';
 
 export default async function main() {
@@ -57,13 +64,7 @@ async function redirectOutput(
   const writeStream = fileDescriptor.createWriteStream();
   const reader = redirectStream.getReader();
 
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (done) break;
-
-    writeStream.write(value);
-  }
+  await writeStreamOutput(reader, writeStream);
 
   writeStream.end();
 }
@@ -78,9 +79,16 @@ async function printOutput({ stdout, stderr }: CommandOutput) {
   }
 }
 
-async function printStdStream(stream: StdStream, type: 'stdout' | 'stderr') {
+async function printStdStream(stream: StdStream, type: RedirectType) {
   const reader = stream.getReader();
 
+  await writeStreamOutput(reader, Bun[type]);
+}
+
+async function writeStreamOutput(
+  reader: ReadableStreamDefaultReader<StdOutput>,
+  writer: Bun.BunFile | WriteStream,
+) {
   let lastValue = null;
   while (true) {
     const { done, value } = await reader.read();
@@ -89,12 +97,12 @@ async function printStdStream(stream: StdStream, type: 'stdout' | 'stderr') {
 
     const valueStr = valueToString(value);
     if (valueStr.length) {
-      await Bun[type].write(valueStr);
+      await writer.write(valueStr);
       lastValue = valueStr;
     }
   }
 
   if (lastValue && !lastValue.endsWith('\n')) {
-    await Bun[type].write('\n');
+    await writer.write('\n');
   }
 }
