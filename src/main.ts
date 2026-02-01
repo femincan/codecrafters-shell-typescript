@@ -3,7 +3,7 @@ import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { parseInput } from './lib/input';
 import type { CommandOutput, StdStream } from './lib/types';
-import { chunkToString } from './lib/utils';
+import { valueToString } from './lib/utils';
 
 export default async function main() {
   await loadCommands();
@@ -49,17 +49,22 @@ async function redirectOutput(
 ) {
   const redirectStream = output[redirect.type];
 
-  let fileDescriptor;
-  if (redirect.override) {
-    fileDescriptor = await open(redirect.targetFile, 'w');
-  } else {
-    fileDescriptor = await open(redirect.targetFile, 'a');
-  }
+  const fileDescriptor = await open(
+    redirect.targetFile,
+    redirect.override ? 'w' : 'a',
+  );
 
   const writeStream = fileDescriptor.createWriteStream();
-  for await (const chunk of redirectStream) {
-    writeStream.write(chunk);
+  const reader = redirectStream.getReader();
+
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) break;
+
+    writeStream.write(value);
   }
+
   writeStream.end();
 }
 
@@ -74,17 +79,22 @@ async function printOutput({ stdout, stderr }: CommandOutput) {
 }
 
 async function printStdStream(stream: StdStream, type: 'stdout' | 'stderr') {
-  let lastChunk = null;
-  for await (const chunk of stream) {
-    const chunkStr = chunkToString(chunk);
+  const reader = stream.getReader();
+  let lastValue = null;
 
-    if (chunkStr.length) {
-      await Bun[type].write(chunkStr);
-      lastChunk = chunkStr;
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) break;
+
+    const valueStr = valueToString(value);
+    if (valueStr.length) {
+      await Bun[type].write(valueStr);
+      lastValue = valueStr;
     }
   }
 
-  if (lastChunk && !lastChunk.endsWith('\n')) {
+  if (lastValue && !lastValue.endsWith('\n')) {
     await Bun[type].write('\n');
   }
 }
