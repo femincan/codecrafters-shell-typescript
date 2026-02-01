@@ -80,8 +80,8 @@ async function printOutput({ stdout, stderr }: CommandOutput) {
 
 async function printStdStream(stream: StdStream, type: 'stdout' | 'stderr') {
   const reader = stream.getReader();
-  let lastValue = null;
 
+  let lastValue = null;
   while (true) {
     const { done, value } = await reader.read();
 
