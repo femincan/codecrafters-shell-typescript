@@ -1,4 +1,4 @@
-type RedirectType = 'stdout' | 'stderr';
+import type { RedirectType } from './types';
 
 export function parseInput(input: string) {
   const parsedArgs = parseArgs(input.trim());
