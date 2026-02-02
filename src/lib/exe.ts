@@ -31,6 +31,25 @@ export async function runExe(
   };
 }
 
+export function getAllExeNames() {
+  const exeNames = [];
+
+  const pathDirs = (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
+  for (const dir of pathDirs) {
+    if (!existsSync(dir)) continue;
+
+    const files = readdirSync(dir);
+    for (const fileName of files) {
+      const filePath = resolve(dir, fileName);
+      if (isExecutable(filePath)) {
+        exeNames.push(fileName);
+      }
+    }
+  }
+
+  return exeNames;
+}
+
 export function getExePath(exeName: string) {
   const pathDirs = (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
 
