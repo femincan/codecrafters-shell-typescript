@@ -1,5 +1,6 @@
 import type { WriteStream } from 'node:fs';
 import { open } from 'node:fs/promises';
+import { createInterface } from 'node:readline/promises';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
 import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
@@ -12,11 +13,18 @@ import type {
 } from './lib/types';
 import { valueToString } from './lib/utils';
 
+const PROMPT = '$ ';
+
 export default async function main() {
   await loadCommands();
-  await printPrompt();
 
-  for await (const input of console) {
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  while (true) {
+    const input = await rl.question(PROMPT);
     const { command, args, redirect } = parseInput(input);
 
     const commandFunction = commandsMap.get(command);
@@ -41,13 +49,7 @@ export default async function main() {
     } else {
       await printOutput(output);
     }
-
-    await printPrompt();
   }
-}
-
-async function printPrompt() {
-  await Bun.stdout.write('$ ');
 }
 
 async function redirectOutput(
