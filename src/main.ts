@@ -2,6 +2,7 @@ import type { WriteStream } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
+import { createCommandsTrie, findCompletions } from './lib/autocomplete';
 import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { parseInput } from './lib/input';
@@ -17,10 +18,15 @@ const PROMPT = '$ ';
 
 export default async function main() {
   await loadCommands();
+  createCommandsTrie();
 
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
+    completer: (prefix) => [
+      findCompletions(prefix).map((comp) => comp + ' '),
+      prefix,
+    ],
   });
 
   while (true) {
