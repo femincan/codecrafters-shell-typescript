@@ -1,14 +1,19 @@
+import { commandsMap } from './command';
+import { getAllExeNames } from './exe';
+
 class TrieNode {
   isLeaf = false;
   children = new Map<string, TrieNode>();
 }
 
-export function createCommandsTrie(...commandNameLists: string[][]) {
-  return createTrie(commandNameLists);
+let commandsTrie: TrieNode;
+
+export function createCommandsTrie() {
+  commandsTrie = createTrie(Array.from(commandsMap.keys()), getAllExeNames());
 }
 
-export function findCompletions(prefix: string, root: TrieNode) {
-  let currentNode = root;
+export function findCompletions(prefix: string) {
+  let currentNode = commandsTrie;
   for (const char of prefix) {
     const next = currentNode.children.get(char);
     if (!next) {
@@ -41,7 +46,7 @@ function collectCompletions(currentWord: string, node: TrieNode) {
   return derivetives;
 }
 
-function createTrie(wordLists: string[][]) {
+function createTrie(...wordLists: string[][]) {
   const rootNode = new TrieNode();
 
   for (const wordList of wordLists) {
