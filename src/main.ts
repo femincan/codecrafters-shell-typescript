@@ -23,10 +23,15 @@ export default async function main() {
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
-    completer: (prefix) => [
-      findCompletions(prefix).map((comp) => comp + ' '),
-      prefix,
-    ],
+    completer: async (prefix) => {
+      const completions = findCompletions(prefix);
+
+      if (!completions.length) {
+        await Bun.stdout.write('\x07');
+      }
+
+      return [completions.map((comp) => comp + ' '), prefix];
+    },
   });
 
   while (true) {
