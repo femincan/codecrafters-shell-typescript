@@ -31,19 +31,19 @@ export function findCompletions(prefix: string) {
 }
 
 function collectCompletions(currentWord: string, node: TrieNode) {
-  const derivetives: string[] = [];
+  const completions: string[] = [];
 
   if (node.isLeaf) {
-    derivetives.push(currentWord);
+    completions.push(currentWord);
   }
 
   for (const [childNodeValue, childNode] of node.children.entries()) {
-    derivetives.push(
+    completions.push(
       ...collectCompletions(currentWord + childNodeValue, childNode),
     );
   }
 
-  return derivetives;
+  return completions;
 }
 
 function createTrie(...wordLists: string[][]) {
