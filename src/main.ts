@@ -20,17 +20,39 @@ export default async function main() {
   await loadCommands();
   createCommandsTrie();
 
+  let tabPressed = false;
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
+    prompt: PROMPT,
     completer: async (prefix) => {
       const completions = findCompletions(prefix);
 
       if (!completions.length) {
         await Bun.stdout.write('\x07');
+        return [[], prefix];
       }
 
-      return [completions.map((comp) => comp + ' '), prefix];
+      if (completions.length !== 1) {
+        if (!tabPressed) {
+          await Bun.stdout.write('\x07');
+          tabPressed = true;
+          return [[], prefix];
+        } else {
+          tabPressed = false;
+
+          await Bun.stdout.write('\n');
+          await Bun.stdout.write(
+            completions.toSorted(Intl.Collator('en').compare).join('  '),
+          );
+          await Bun.stdout.write('\n');
+          rl.prompt(true);
+
+          return [[], prefix];
+        }
+      }
+
+      return [[`${completions[0]} `], prefix];
     },
   });
 
