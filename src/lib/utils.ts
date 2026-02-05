@@ -7,3 +7,23 @@ export function stringToStream(str: string): StdStream {
 export function valueToString(value: StdOutput) {
   return new TextDecoder().decode(value);
 }
+
+export function getLongestCommonPrefix(strings: string[]) {
+  if (!strings.length) return '';
+
+  const firstStr = strings[0]!;
+
+  let i = 0;
+  while (true) {
+    const char = firstStr[i];
+    if (!char) return firstStr.slice(0, i);
+
+    for (const str of strings) {
+      if (str[i] !== char) {
+        return firstStr.slice(0, i);
+      }
+    }
+
+    i++;
+  }
+}
