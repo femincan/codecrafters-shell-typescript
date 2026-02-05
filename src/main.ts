@@ -12,7 +12,7 @@ import type {
   StdOutput,
   StdStream,
 } from './lib/types';
-import { valueToString } from './lib/utils';
+import { getLongestCommonPrefix, valueToString } from './lib/utils';
 
 const PROMPT = '$ ';
 
@@ -20,7 +20,7 @@ export default async function main() {
   await loadCommands();
   createCommandsTrie();
 
-  let tabPressed = false;
+  let previousPrefix = '';
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -34,12 +34,8 @@ export default async function main() {
       }
 
       if (completions.length !== 1) {
-        if (!tabPressed) {
-          await Bun.stdout.write('\x07');
-          tabPressed = true;
-          return [[], prefix];
-        } else {
-          tabPressed = false;
+        if (previousPrefix === prefix) {
+          previousPrefix = '';
 
           await Bun.stdout.write('\n');
           await Bun.stdout.write(
@@ -48,6 +44,16 @@ export default async function main() {
           await Bun.stdout.write('\n');
           rl.prompt(true);
 
+          return [[], prefix];
+        } else {
+          previousPrefix = prefix;
+
+          const lgs = getLongestCommonPrefix(completions);
+          if (lgs && lgs !== prefix) {
+            return [[lgs], prefix];
+          }
+
+          await Bun.stdout.write('\x07');
           return [[], prefix];
         }
       }
