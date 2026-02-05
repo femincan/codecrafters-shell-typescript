@@ -5,6 +5,7 @@ import type { ReadableStreamDefaultReader } from 'node:stream/web';
 import { createCommandsTrie, findCompletions } from './lib/autocomplete';
 import { commandsMap, loadCommands } from './lib/command';
 import { runExe } from './lib/exe';
+import { commandHistory } from './lib/history';
 import { parseInput } from './lib/input';
 import type {
   CommandOutput,
@@ -65,6 +66,8 @@ export default async function main() {
   while (true) {
     const input = await rl.question(PROMPT);
     const { command, args, redirect } = parseInput(input);
+
+    commandHistory.push(input);
 
     const commandFunction = commandsMap.get(command);
 
