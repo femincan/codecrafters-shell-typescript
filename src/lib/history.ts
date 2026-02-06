@@ -1,10 +1,12 @@
 export const commandHistory: string[] = [];
 
-export function getFormattedCmdHistory() {
+export function getFormattedCmdHistory(
+  history: { index: number; value: string }[],
+) {
   let formattedHistory = '';
 
-  for (let i = 0; i < commandHistory.length; i++) {
-    formattedHistory += `${i + 1} ${commandHistory[i]}\n`;
+  for (const hObj of history) {
+    formattedHistory += `${hObj.index} ${hObj.value}\n`;
   }
 
   return formattedHistory;
