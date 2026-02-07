@@ -1,6 +1,6 @@
-import { createCommand } from '@/lib/command';
+import { registerCommand } from '@/lib/command';
 import { stringToStream } from '@/lib/utils';
 
-createCommand('echo', (args) => {
+export default registerCommand('echo', (args) => {
   return { stdout: stringToStream(args.join(' ')), stderr: stringToStream('') };
 });

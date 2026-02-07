@@ -3,7 +3,7 @@ import { open } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
 import { createCommandsTrie, findCompletions } from './lib/autocomplete';
-import { commandsMap, loadCommands } from './lib/command';
+import { commandsMap, registerCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { commandHistory } from './lib/history';
 import { parseInput } from './lib/input';
@@ -18,7 +18,7 @@ import { getLongestCommonPrefix, valueToString } from './lib/utils';
 const PROMPT = '$ ';
 
 export default async function main() {
-  await loadCommands();
+  await registerCommands();
   createCommandsTrie();
 
   let previousPrefix = '';

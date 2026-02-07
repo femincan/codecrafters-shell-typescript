@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { CommandOutput } from './types';
 
@@ -7,20 +7,34 @@ type CommandFunction = (args: string[]) => CommandOutput;
 
 export const commandsMap = new Map<CommandName, CommandFunction>();
 
-export function createCommand(name: CommandName, func: CommandFunction) {
-  commandsMap.set(name, func);
+export function registerCommand(name: CommandName, func: CommandFunction) {
+  return () => commandsMap.set(name, func);
 }
 
-export async function loadCommands() {
+export async function registerCommands() {
   const commandsDirPath = resolve(import.meta.dir, '..', 'commands');
 
-  if (!statSync(commandsDirPath).isDirectory()) {
-    return;
+  if (!existsSync(commandsDirPath)) {
+    throw new Error('The "commands" directory does not exist.');
   }
 
-  const commandFiles = readdirSync(commandsDirPath);
+  if (!statSync(commandsDirPath).isDirectory()) {
+    throw new Error('"commands" exists but is not a directory.');
+  }
+
+  const commandFiles = readdirSync(commandsDirPath).filter((file) =>
+    file.endsWith('.ts'),
+  );
 
   for (const file of commandFiles) {
-    await import(resolve(commandsDirPath, file));
+    const mod = await import(resolve(commandsDirPath, file));
+
+    if (typeof mod.default !== 'function') {
+      throw new Error(
+        `Invalid command file "${file}": expected a default-exported registerCommand function.`,
+      );
+    }
+
+    mod.default();
   }
 }

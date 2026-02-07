@@ -1,5 +1,5 @@
-import { createCommand } from '@/lib/command';
+import { registerCommand } from '@/lib/command';
 
-createCommand('exit', () => {
+export default registerCommand('exit', () => {
   process.exit(0);
 });

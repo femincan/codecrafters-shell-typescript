@@ -1,7 +1,7 @@
-import { createCommand } from '@/lib/command';
+import { registerCommand } from '@/lib/command';
 import { stringToStream } from '@/lib/utils';
 
-createCommand('cd', (args) => {
+export default registerCommand('cd', (args) => {
   const targetLoc = args[0] || '';
 
   let dir = targetLoc;

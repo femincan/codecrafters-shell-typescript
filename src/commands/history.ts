@@ -1,8 +1,8 @@
-import { createCommand } from '@/lib/command';
+import { registerCommand } from '@/lib/command';
 import { commandHistory, getFormattedCmdHistory } from '@/lib/history';
 import { stringToStream } from '@/lib/utils';
 
-createCommand('history', (args) => {
+export default registerCommand('history', (args) => {
   let n: number = Number(args[0]);
 
   return {
