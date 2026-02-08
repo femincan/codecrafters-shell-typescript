@@ -1,9 +1,17 @@
 export type RedirectType = 'stdout' | 'stderr';
 
-export function parseInput(input: string) {
+export type ParseInputResult = {
+  command: string;
+  args: string[];
+  redirect?: ParsedRedirectData & {
+    targetFile: string;
+  };
+};
+
+export function parseInput(input: string): ParseInputResult {
   const parsedArgs = parseArgs(input.trim());
   const command = parsedArgs.shift() ?? '';
-  const redirectData = getRedirectTypeWithMode(parsedArgs.at(-2) ?? '');
+  const redirectData = parseRedirect(parsedArgs.at(-2) ?? '');
 
   if (redirectData && parsedArgs.length >= 2) {
     return {
@@ -72,25 +80,17 @@ function parseArgs(argsStr: string) {
   return args;
 }
 
-function getRedirectTypeWithMode(redirectStr: string): {
-  type: RedirectType;
-  override: boolean;
-} | null {
-  if (['1>', '>'].includes(redirectStr)) {
-    return { type: 'stdout', override: true };
-  }
+type ParsedRedirectData = { type: RedirectType; override: boolean };
 
-  if (['1>>', '>>'].includes(redirectStr)) {
-    return { type: 'stdout', override: false };
-  }
+const redirectMap = new Map<string, ParsedRedirectData>([
+  ['>', { type: 'stdout', override: true }],
+  ['1>', { type: 'stdout', override: true }],
+  ['>>', { type: 'stdout', override: false }],
+  ['1>>', { type: 'stdout', override: false }],
+  ['2>', { type: 'stderr', override: true }],
+  ['2>>', { type: 'stderr', override: false }],
+]);
 
-  if (['2>'].includes(redirectStr)) {
-    return { type: 'stderr', override: true };
-  }
-
-  if (['2>>'].includes(redirectStr)) {
-    return { type: 'stderr', override: false };
-  }
-
-  return null;
+function parseRedirect(redirectStr: string): ParsedRedirectData | null {
+  return redirectMap.get(redirectStr) ?? null;
 }
