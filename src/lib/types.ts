@@ -5,5 +5,3 @@ export type CommandOutput = {
   stdout: StdStream;
   stderr: StdStream;
 };
-
-export type RedirectType = 'stdout' | 'stderr';

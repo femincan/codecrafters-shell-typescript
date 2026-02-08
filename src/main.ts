@@ -6,13 +6,8 @@ import { createCommandsTrie, findCompletions } from './lib/autocomplete';
 import { commandsMap, registerCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { commandHistory } from './lib/history';
-import { parseInput } from './lib/input';
-import type {
-  CommandOutput,
-  RedirectType,
-  StdOutput,
-  StdStream,
-} from './lib/types';
+import { parseInput, type RedirectType } from './lib/input';
+import type { CommandOutput, StdOutput, StdStream } from './lib/types';
 import { getLongestCommonPrefix, valueToString } from './lib/utils';
 
 const PROMPT = '$ ';
