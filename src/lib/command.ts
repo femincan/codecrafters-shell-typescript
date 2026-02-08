@@ -1,17 +1,21 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { CommandOutput } from './types';
+import type { StdStream } from './output';
+import type { ShellState } from './shell';
 
 type CommandName = string;
-type CommandFunction = (args: string[]) => CommandOutput;
-
-export const commandsMap = new Map<CommandName, CommandFunction>();
+export type CommandOutput = {
+  stdout: StdStream;
+  stderr: StdStream;
+};
+type CommandFunction = (args: string[], state: ShellState) => CommandOutput;
+export type CommandsMap = Map<CommandName, CommandFunction>;
 
 export function registerCommand(name: CommandName, func: CommandFunction) {
-  return () => commandsMap.set(name, func);
+  return (commandsMap: CommandsMap) => commandsMap.set(name, func);
 }
 
-export async function registerCommands() {
+export async function registerCommands(commandsMap: CommandsMap) {
   const commandsDirPath = resolve(import.meta.dir, '..', 'commands');
 
   if (!existsSync(commandsDirPath)) {
@@ -35,6 +39,6 @@ export async function registerCommands() {
       );
     }
 
-    mod.default();
+    mod.default(commandsMap);
   }
 }

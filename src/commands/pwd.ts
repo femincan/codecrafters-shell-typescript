@@ -1,6 +1,9 @@
 import { registerCommand } from '@/lib/command';
-import { stringToStream } from '@/lib/utils';
+import { stringToStdStream } from '@/lib/output';
 
 export default registerCommand('pwd', () => {
-  return { stdout: stringToStream(process.cwd()), stderr: stringToStream('') };
+  return {
+    stdout: stringToStdStream(process.cwd()),
+    stderr: stringToStdStream(''),
+  };
 });

@@ -1,3 +1,5 @@
-import main from './main';
+import { Shell } from './shell';
 
-await main();
+const shell = new Shell();
+
+await shell.start();

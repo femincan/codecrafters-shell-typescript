@@ -2,7 +2,7 @@ import type {
   Completer as ReadlineCompleter,
   Interface as ReadlineInterface,
 } from 'readline/promises';
-import { commandsMap } from './command';
+import { type CommandsMap } from './command';
 import { getAllExeNames } from './exe';
 
 class TrieNode {
@@ -12,7 +12,7 @@ class TrieNode {
 
 let commandsTrie: TrieNode;
 
-export function createCommandsTrie() {
+export function createCommandsTrie(commandsMap: CommandsMap) {
   commandsTrie = createTrie(Array.from(commandsMap.keys()), getAllExeNames());
 }
 
@@ -56,7 +56,7 @@ export function createCompleter(rl: ReadlineInterface): ReadlineCompleter {
   };
 }
 
-export function findCompletions(prefix: string) {
+function findCompletions(prefix: string) {
   let currentNode = commandsTrie;
   for (const char of prefix) {
     const next = currentNode.children.get(char);

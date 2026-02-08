@@ -1,5 +1,5 @@
 import { registerCommand } from '@/lib/command';
-import { stringToStream } from '@/lib/utils';
+import { stringToStdStream } from '@/lib/output';
 
 export default registerCommand('cd', (args) => {
   const targetLoc = args[0] || '';
@@ -13,10 +13,10 @@ export default registerCommand('cd', (args) => {
     process.chdir(dir);
   } catch {
     return {
-      stdout: stringToStream(''),
-      stderr: stringToStream(`cd: ${targetLoc}: No such file or directory`),
+      stdout: stringToStdStream(''),
+      stderr: stringToStdStream(`cd: ${targetLoc}: No such file or directory`),
     };
   }
 
-  return { stdout: stringToStream(''), stderr: stringToStream('') };
+  return { stdout: stringToStdStream(''), stderr: stringToStdStream('') };
 });

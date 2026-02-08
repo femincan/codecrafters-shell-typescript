@@ -1,27 +1,27 @@
-import { commandsMap, registerCommand } from '@/lib/command';
+import { registerCommand } from '@/lib/command';
 import { getExePath } from '@/lib/exe';
-import { stringToStream } from '@/lib/utils';
+import { stringToStdStream } from '@/lib/output';
 
-export default registerCommand('type', (args) => {
+export default registerCommand('type', (args, state) => {
   const command = args[0] || '';
 
-  if (commandsMap.has(command)) {
+  if (state.commands.has(command)) {
     return {
-      stdout: stringToStream(`${command} is a shell builtin`),
-      stderr: stringToStream(''),
+      stdout: stringToStdStream(`${command} is a shell builtin`),
+      stderr: stringToStdStream(''),
     };
   }
 
   const exePath = getExePath(command);
   if (exePath) {
     return {
-      stdout: stringToStream(`${command} is ${exePath}`),
-      stderr: stringToStream(''),
+      stdout: stringToStdStream(`${command} is ${exePath}`),
+      stderr: stringToStdStream(''),
     };
   }
 
   return {
-    stdout: stringToStream(''),
-    stderr: stringToStream(`${command}: not found`),
+    stdout: stringToStdStream(''),
+    stderr: stringToStdStream(`${command}: not found`),
   };
 });
