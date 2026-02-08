@@ -2,13 +2,13 @@ import type { WriteStream } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
-import { createCommandsTrie, findCompletions } from './lib/autocomplete';
+import { createCommandsTrie, createCompleter } from './lib/autocomplete';
 import { commandsMap, registerCommands } from './lib/command';
 import { runExe } from './lib/exe';
 import { commandHistory } from './lib/history';
 import { parseInput, type RedirectType } from './lib/input';
 import type { CommandOutput, StdOutput, StdStream } from './lib/types';
-import { getLongestCommonPrefix, valueToString } from './lib/utils';
+import { valueToString } from './lib/utils';
 
 const PROMPT = '$ ';
 
@@ -16,45 +16,13 @@ export default async function main() {
   await registerCommands();
   createCommandsTrie();
 
-  let previousPrefix = '';
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
     prompt: PROMPT,
-    completer: async (prefix) => {
-      const completions = findCompletions(prefix);
-
-      if (!completions.length) {
-        await Bun.stdout.write('\x07');
-        return [[], prefix];
-      }
-
-      if (completions.length !== 1) {
-        if (previousPrefix === prefix) {
-          previousPrefix = '';
-
-          await Bun.stdout.write('\n');
-          await Bun.stdout.write(
-            completions.toSorted(Intl.Collator('en').compare).join('  '),
-          );
-          await Bun.stdout.write('\n');
-          rl.prompt(true);
-
-          return [[], prefix];
-        } else {
-          previousPrefix = prefix;
-
-          const lgs = getLongestCommonPrefix(completions);
-          if (lgs && lgs !== prefix) {
-            return [[lgs], prefix];
-          }
-
-          await Bun.stdout.write('\x07');
-          return [[], prefix];
-        }
-      }
-
-      return [[`${completions[0]} `], prefix];
+    completer: (line) => {
+      const completerFunc = createCompleter(rl);
+      return completerFunc(line);
     },
   });
 

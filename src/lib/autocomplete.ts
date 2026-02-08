@@ -1,3 +1,7 @@
+import type {
+  Completer as ReadlineCompleter,
+  Interface as ReadlineInterface,
+} from 'readline/promises';
 import { commandsMap } from './command';
 import { getAllExeNames } from './exe';
 
@@ -10,6 +14,46 @@ let commandsTrie: TrieNode;
 
 export function createCommandsTrie() {
   commandsTrie = createTrie(Array.from(commandsMap.keys()), getAllExeNames());
+}
+
+export function createCompleter(rl: ReadlineInterface): ReadlineCompleter {
+  let previousPrefix = '';
+
+  return async (prefix) => {
+    const completions = findCompletions(prefix);
+
+    if (!completions.length) {
+      await Bun.stdout.write('\x07');
+      return [[], prefix];
+    }
+
+    if (completions.length !== 1) {
+      if (previousPrefix === prefix) {
+        previousPrefix = '';
+
+        await Bun.stdout.write('\n');
+        await Bun.stdout.write(
+          completions.toSorted(Intl.Collator('en').compare).join('  '),
+        );
+        await Bun.stdout.write('\n');
+        rl.prompt(true);
+
+        return [[], prefix];
+      } else {
+        previousPrefix = prefix;
+
+        const lgs = getLongestCommonPrefix(completions);
+        if (lgs && lgs !== prefix) {
+          return [[lgs], prefix];
+        }
+
+        await Bun.stdout.write('\x07');
+        return [[], prefix];
+      }
+    }
+
+    return [[`${completions[0]} `], prefix];
+  };
 }
 
 export function findCompletions(prefix: string) {
@@ -65,4 +109,24 @@ function createTrie(...wordLists: string[][]) {
   }
 
   return rootNode;
+}
+
+function getLongestCommonPrefix(strings: string[]) {
+  if (!strings.length) return '';
+
+  const firstStr = strings[0]!;
+
+  let i = 0;
+  while (true) {
+    const char = firstStr[i];
+    if (!char) return firstStr.slice(0, i);
+
+    for (const str of strings) {
+      if (str[i] !== char) {
+        return firstStr.slice(0, i);
+      }
+    }
+
+    i++;
+  }
 }
