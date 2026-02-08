@@ -5,8 +5,8 @@ import {
   readdirSync,
 } from 'node:fs';
 import { delimiter, resolve } from 'node:path';
-import type { CommandOutput } from './types';
-import { stringToStream } from './utils';
+import type { CommandOutput } from './command';
+import { stringToStdStream } from './output';
 
 export async function runExe(
   command: string,
@@ -16,8 +16,8 @@ export async function runExe(
 
   if (!exePath) {
     return {
-      stdout: stringToStream(''),
-      stderr: stringToStream(`${command}: command not found`),
+      stdout: stringToStdStream(''),
+      stderr: stringToStdStream(`${command}: command not found`),
     };
   }
 
