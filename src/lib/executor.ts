@@ -9,7 +9,7 @@ export async function executeCommand(
   const commandFunction = state.commands.get(command);
 
   if (commandFunction) {
-    return commandFunction(args, state);
+    return await commandFunction(args, state);
   } else {
     return await runExe(command, args);
   }

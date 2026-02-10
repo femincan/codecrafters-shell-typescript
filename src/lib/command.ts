@@ -8,7 +8,10 @@ export type CommandOutput = {
   stdout: StdStream;
   stderr: StdStream;
 };
-type CommandFunction = (args: string[], state: ShellState) => CommandOutput;
+type CommandFunction = (
+  args: string[],
+  state: ShellState,
+) => CommandOutput | Promise<CommandOutput>;
 export type CommandsMap = Map<CommandName, CommandFunction>;
 
 export function registerCommand(name: CommandName, func: CommandFunction) {
