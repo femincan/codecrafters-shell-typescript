@@ -1,5 +1,4 @@
-import type { WriteStream } from 'node:fs';
-import { open } from 'node:fs/promises';
+import { createWriteStream, type WriteStream } from 'node:fs';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
 import type { CommandOutput } from './command';
 import type { parseInput, ParseInputResult, RedirectType } from './input';
@@ -38,15 +37,10 @@ async function redirectOutput(
   output: CommandOutput,
   redirect: NonNullable<ReturnType<typeof parseInput>['redirect']>,
 ) {
-  const redirectStream = output[redirect.type];
-
-  const fileDescriptor = await open(
-    redirect.targetFile,
-    redirect.override ? 'w' : 'a',
-  );
-
-  const writeStream = fileDescriptor.createWriteStream();
-  const reader = redirectStream.getReader();
+  const reader = output[redirect.type].getReader();
+  const writeStream = createWriteStream(redirect.targetFile, {
+    flags: redirect.override ? 'w' : 'a',
+  });
 
   await writeStreamOutput(reader, writeStream);
 
