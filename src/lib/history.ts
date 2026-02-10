@@ -1,5 +1,3 @@
-export const commandHistory: string[] = [];
-
 export function getFormattedCmdHistory(
   history: { index: number; value: string }[],
 ) {
