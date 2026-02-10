@@ -1,22 +1,12 @@
 import { registerCommand } from '@/lib/command';
-import { commandHistory, getFormattedCmdHistory } from '@/lib/history';
+import { createFormattedHistoryStream } from '@/lib/history';
 import { stringToStdStream } from '@/lib/output';
 
-export default registerCommand('history', (args) => {
-  let n: number = Number(args[0]);
-
+export default registerCommand('history', (args, state) => {
   return {
-    stdout: stringToStdStream(
-      getFormattedCmdHistory(
-        commandHistory
-          .slice(-n)
-          .toReversed()
-          .map((hItem, i) => ({
-            index: commandHistory.length - i,
-            value: hItem,
-          }))
-          .toReversed(),
-      ),
+    stdout: createFormattedHistoryStream(
+      state.rl.history,
+      Number(args[0]) || state.rl.history.length,
     ),
     stderr: stringToStdStream(''),
   };
