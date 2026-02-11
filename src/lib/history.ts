@@ -10,10 +10,10 @@ export function createFormattedHistoryStream(
   return new ReadableStream({
     type: 'direct',
     pull(controller) {
-      let order = 1;
-      for (let i = count; i > 0; i--) {
-        controller.write(encoder.encode(`${order} ${history[i - 1]}\n`));
-        order += 1;
+      for (let i = count - 1; i >= 0; i--) {
+        controller.write(
+          encoder.encode(`${history.length - i} ${history[i]}\n`),
+        );
       }
 
       controller.end();
