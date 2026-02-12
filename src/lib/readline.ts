@@ -6,11 +6,9 @@ export function createReadlineInterface(prompt: string) {
     input: process.stdin,
     output: process.stdout,
     prompt: prompt,
-    completer: (line) => {
-      const completerFunc = createCompleter(rl);
-      return completerFunc(line);
-    },
   });
+
+  rl.completer = createCompleter(rl);
 
   return rl;
 }
