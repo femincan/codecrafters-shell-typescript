@@ -1,4 +1,6 @@
-import type { StdStream } from './output';
+import { createReadStream, existsSync } from 'node:fs';
+import { createInterface, Interface } from 'node:readline';
+import { type StdStream } from './output';
 
 export function createFormattedHistoryStream(
   history: string[],
@@ -19,4 +21,24 @@ export function createFormattedHistoryStream(
       controller.end();
     },
   });
+}
+
+export function createHistoryFileReader(
+  filePath: string,
+): { ok: false; err: string } | { ok: true; reader: Interface } {
+  if (!existsSync(filePath)) {
+    return {
+      ok: false,
+      err: `Given history file does not exist: "${filePath}"`,
+    };
+  }
+
+  const stream = createReadStream(filePath);
+
+  const rl = createInterface({
+    input: stream,
+    crlfDelay: Infinity,
+  });
+
+  return { ok: true, reader: rl };
 }
