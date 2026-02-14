@@ -1,5 +1,9 @@
 import { registerCommand } from '@/lib/command';
-import { createFormattedHistoryStream, readHistoryFile } from '@/lib/history';
+import {
+  addHistoryToFile,
+  createFormattedHistoryStream,
+  readHistoryFile,
+} from '@/lib/history';
 import { stringToStdStream } from '@/lib/output';
 
 export default registerCommand('history', async (args, state) => {
@@ -7,7 +11,7 @@ export default registerCommand('history', async (args, state) => {
     stderr = stringToStdStream('');
 
   switch (args[0]) {
-    case '-r':
+    case '-r': {
       const historyFilePath = args[1];
       if (!historyFilePath) {
         stderr = stringToStdStream(
@@ -25,6 +29,46 @@ export default registerCommand('history', async (args, state) => {
         stderr = stringToStdStream(readResult.err);
       }
       break;
+    }
+    case '-w': {
+      const historyFilePath = args[1];
+      if (!historyFilePath) {
+        stderr = stringToStdStream(
+          'Missing target history file. Usage: -w <history_file>',
+        );
+
+        break;
+      }
+
+      const appendResult = await addHistoryToFile(
+        historyFilePath,
+        state.rl.history,
+      );
+      if (!appendResult.ok) {
+        stderr = stringToStdStream(appendResult.err);
+      }
+      break;
+    }
+    case '-a': {
+      const historyFilePath = args[1];
+      if (!historyFilePath) {
+        stderr = stringToStdStream(
+          'Missing target history file. Usage: -a <history_file>',
+        );
+
+        break;
+      }
+
+      const appendResult = await addHistoryToFile(
+        historyFilePath,
+        state.rl.history,
+        false,
+      );
+      if (!appendResult.ok) {
+        stderr = stringToStdStream(appendResult.err);
+      }
+      break;
+    }
 
     default:
       stdout = createFormattedHistoryStream(
