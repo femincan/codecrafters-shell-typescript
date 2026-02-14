@@ -1,6 +1,5 @@
-import { createReadStream } from 'node:fs';
+import { createReadStream, createWriteStream } from 'node:fs';
 import { createInterface } from 'node:readline';
-import type { Interface } from 'node:readline/promises';
 import { type StdStream } from './output';
 
 export function createFormattedHistoryStream(
@@ -40,6 +39,33 @@ export async function readHistoryFile(
       history.unshift(line);
     }
 
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      err:
+        error instanceof Error
+          ? error.message
+          : `Failed to open history file: ${filePath}`,
+    };
+  }
+}
+
+export async function addHistoryToFile(
+  filePath: string,
+  history: string[],
+  override: boolean = true,
+): Promise<{ ok: false; err: string } | { ok: true }> {
+  try {
+    const stream = createWriteStream(filePath, {
+      flags: override ? 'w' : 'a',
+    });
+
+    for (let i = history.length - 1; i >= 0; i--) {
+      stream.write(`${history[i]}\n`);
+    }
+
+    stream.end();
     return { ok: true };
   } catch (error) {
     return {
