@@ -26,7 +26,7 @@ export function createFormattedHistoryStream(
 
 export async function readHistoryFile(
   filePath: string,
-  history: Interface['history'],
+  history: string[],
 ): Promise<{ ok: false; err: string } | { ok: true }> {
   try {
     const stream = createReadStream(filePath);
