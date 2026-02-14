@@ -1,5 +1,6 @@
-import { createReadStream, existsSync } from 'node:fs';
-import { createInterface, Interface } from 'node:readline';
+import { createReadStream } from 'node:fs';
+import { createInterface } from 'node:readline';
+import type { Interface } from 'node:readline/promises';
 import { type StdStream } from './output';
 
 export function createFormattedHistoryStream(
@@ -23,22 +24,30 @@ export function createFormattedHistoryStream(
   });
 }
 
-export function createHistoryFileReader(
+export async function readHistoryFile(
   filePath: string,
-): { ok: false; err: string } | { ok: true; reader: Interface } {
-  if (!existsSync(filePath)) {
+  history: Interface['history'],
+): Promise<{ ok: false; err: string } | { ok: true }> {
+  try {
+    const stream = createReadStream(filePath);
+
+    const rl = createInterface({
+      input: stream,
+      crlfDelay: Infinity,
+    });
+
+    for await (const line of rl) {
+      history.unshift(line);
+    }
+
+    return { ok: true };
+  } catch (error) {
     return {
       ok: false,
-      err: `Given history file does not exist: "${filePath}"`,
+      err:
+        error instanceof Error
+          ? error.message
+          : `Failed to open history file: ${filePath}`,
     };
   }
-
-  const stream = createReadStream(filePath);
-
-  const rl = createInterface({
-    input: stream,
-    crlfDelay: Infinity,
-  });
-
-  return { ok: true, reader: rl };
 }

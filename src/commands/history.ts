@@ -1,8 +1,5 @@
 import { registerCommand } from '@/lib/command';
-import {
-  createFormattedHistoryStream,
-  createHistoryFileReader,
-} from '@/lib/history';
+import { createFormattedHistoryStream, readHistoryFile } from '@/lib/history';
 import { stringToStdStream } from '@/lib/output';
 
 export default registerCommand('history', async (args, state) => {
@@ -14,22 +11,19 @@ export default registerCommand('history', async (args, state) => {
       const historyFilePath = args[1];
       if (!historyFilePath) {
         stderr = stringToStdStream(
-          'The target history file should be provided after the "-i" argument',
+          'Missing target history file. Usage: -i <history_file>',
         );
 
         break;
       }
 
-      const readResult = createHistoryFileReader(historyFilePath);
+      const readResult = await readHistoryFile(
+        historyFilePath,
+        state.rl.history,
+      );
       if (!readResult.ok) {
         stderr = stringToStdStream(readResult.err);
-        break;
       }
-
-      for await (const line of readResult.reader) {
-        state.rl.history.unshift(line);
-      }
-
       break;
 
     default:
