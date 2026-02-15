@@ -1,12 +1,10 @@
 import { createReadStream, createWriteStream } from 'node:fs';
 import { createInterface } from 'node:readline';
+import type { Interface } from 'node:readline/promises';
 import { type StdStream } from './output';
 
-type HistoryEntry = string;
-type HistoryArray = HistoryEntry[];
-
 export function createFormattedHistoryStream(
-  history: HistoryArray[],
+  history: Interface['history'],
   limit: number,
 ): StdStream {
   const count = Math.min(history.length, limit);
@@ -25,7 +23,7 @@ export function createFormattedHistoryStream(
 
 export async function readHistoryFile(
   filePath: string,
-  history: HistoryArray,
+  history: Interface['history'],
 ): Promise<{ ok: false; err: string } | { ok: true }> {
   try {
     const stream = createReadStream(filePath);
@@ -53,7 +51,7 @@ export async function readHistoryFile(
 
 export function writeHistoryToFile(
   filePath: string,
-  history: HistoryArray,
+  history: Interface['history'],
 ): { ok: false; err: string } | { ok: true } {
   try {
     const stream = createWriteStream(filePath, { flags: 'w' });
