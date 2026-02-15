@@ -2,8 +2,11 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { type StdStream } from './output';
 
+type HistoryEntry = string;
+type HistoryArray = HistoryEntry[];
+
 export function createFormattedHistoryStream(
-  history: string[],
+  history: HistoryArray[],
   limit: number,
 ): StdStream {
   const encoder = new TextEncoder();
@@ -25,7 +28,7 @@ export function createFormattedHistoryStream(
 
 export async function readHistoryFile(
   filePath: string,
-  history: string[],
+  history: HistoryArray,
 ): Promise<{ ok: false; err: string } | { ok: true }> {
   try {
     const stream = createReadStream(filePath);
@@ -53,7 +56,7 @@ export async function readHistoryFile(
 
 export async function addHistoryToFile(
   filePath: string,
-  history: string[],
+  history: HistoryArray,
   override: boolean = true,
 ): Promise<{ ok: false; err: string } | { ok: true }> {
   try {
