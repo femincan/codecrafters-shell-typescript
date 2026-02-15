@@ -51,15 +51,12 @@ export async function readHistoryFile(
   }
 }
 
-export async function addHistoryToFile(
+export function writeHistoryToFile(
   filePath: string,
   history: HistoryArray,
-  override: boolean = true,
-): Promise<{ ok: false; err: string } | { ok: true }> {
+): { ok: false; err: string } | { ok: true } {
   try {
-    const stream = createWriteStream(filePath, {
-      flags: override ? 'w' : 'a',
-    });
+    const stream = createWriteStream(filePath, { flags: 'w' });
 
     for (let i = history.length - 1; i >= 0; i--) {
       stream.write(`${history[i]}\n`);
@@ -76,4 +73,32 @@ export async function addHistoryToFile(
           : `Failed to open history file: ${filePath}`,
     };
   }
+}
+
+export function createAppender() {
+  let lastIndex = -1;
+
+  return (
+    filePath: string,
+    history: string[],
+  ): { ok: false; err: string } | { ok: true } => {
+    try {
+      const stream = createWriteStream(filePath, { flags: 'a' });
+
+      for (; lastIndex >= -history.length; lastIndex--) {
+        stream.write(`${history.at(lastIndex)}\n`);
+      }
+
+      stream.end();
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        err:
+          error instanceof Error
+            ? error.message
+            : `Failed to open history file: ${filePath}`,
+      };
+    }
+  };
 }
