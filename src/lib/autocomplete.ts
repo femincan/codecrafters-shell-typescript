@@ -112,9 +112,8 @@ function createTrie(...wordLists: string[][]) {
 }
 
 function getLongestCommonPrefix(strings: string[]) {
-  if (!strings.length) return '';
-
-  const firstStr = strings[0]!;
+  const firstStr = strings[0];
+  if (!firstStr) return '';
 
   let i = 0;
   while (true) {
