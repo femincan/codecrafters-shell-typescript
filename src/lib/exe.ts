@@ -34,7 +34,7 @@ export async function runExe(
 export function getAllExeNames() {
   const exeNames = [];
 
-  const pathDirs = (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
+  const pathDirs = getPathDirs();
   for (const dir of pathDirs) {
     if (!existsSync(dir)) continue;
 
@@ -51,8 +51,7 @@ export function getAllExeNames() {
 }
 
 export function getExePath(exeName: string) {
-  const pathDirs = (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
-
+  const pathDirs = getPathDirs();
   for (const dir of pathDirs) {
     if (!existsSync(dir)) continue;
 
@@ -66,6 +65,10 @@ export function getExePath(exeName: string) {
   }
 
   return null;
+}
+
+function getPathDirs() {
+  return (Bun.env.PATH || Bun.env.Path || '').split(delimiter);
 }
 
 function isExecutable(filePath: string) {
