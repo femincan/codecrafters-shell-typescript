@@ -25,12 +25,14 @@ export async function handleOutput(
   }
 }
 
+const textEncoder = new TextEncoder();
 export function stringToStdStream(str: string): StdStream {
-  return new Response(new TextEncoder().encode(str)).body!;
+  return new Response(textEncoder.encode(str)).body!;
 }
 
+const textDecoder = new TextDecoder();
 export function stdOutputToString(output: StdOutput) {
-  return new TextDecoder().decode(output);
+  return textDecoder.decode(output);
 }
 
 async function redirectOutput(
