@@ -1,5 +1,4 @@
 import { registerCommand } from '@/lib/command';
-import { getExePath } from '@/lib/exe';
 import { stringToStdStream } from '@/lib/output';
 
 export default registerCommand('type', (args, state) => {
@@ -12,16 +11,16 @@ export default registerCommand('type', (args, state) => {
     };
   }
 
-  const exePath = getExePath(command);
-  if (exePath) {
+  const exePath = state.exeMap.get(command);
+  if (!exePath) {
     return {
-      stdout: stringToStdStream(`${command} is ${exePath}`),
-      stderr: stringToStdStream(''),
+      stdout: stringToStdStream(''),
+      stderr: stringToStdStream(`${command}: not found`),
     };
   }
 
   return {
-    stdout: stringToStdStream(''),
-    stderr: stringToStdStream(`${command}: not found`),
+    stdout: stringToStdStream(`${command} is ${exePath}`),
+    stderr: stringToStdStream(''),
   };
 });

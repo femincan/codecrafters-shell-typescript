@@ -3,7 +3,7 @@ import type {
   Interface as ReadlineInterface,
 } from 'readline/promises';
 import { type CommandsMap } from './command';
-import { getAllExeNames } from './exe';
+import { type ExeMap } from './exe';
 
 class TrieNode {
   isLeaf = false;
@@ -12,8 +12,11 @@ class TrieNode {
 
 let commandsTrie: TrieNode;
 
-export function createCommandsTrie(commandsMap: CommandsMap) {
-  commandsTrie = createTrie(Array.from(commandsMap.keys()), getAllExeNames());
+export function createCommandsTrie(commandsMap: CommandsMap, exeMap: ExeMap) {
+  commandsTrie = createTrie(
+    Array.from(commandsMap.keys()),
+    Array.from(exeMap.keys()),
+  );
 }
 
 export function createCompleter(rl: ReadlineInterface): ReadlineCompleter {

@@ -11,6 +11,6 @@ export async function executeCommand(
   if (commandFunction) {
     return await commandFunction(args, state);
   } else {
-    return await runExe(command, args);
+    return await runExe(command, args, state);
   }
 }

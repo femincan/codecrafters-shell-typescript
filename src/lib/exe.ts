@@ -7,13 +7,16 @@ import {
 import { delimiter, resolve } from 'node:path';
 import type { CommandOutput } from './command';
 import { stringToStdStream } from './output';
+import type { ShellState } from './shell';
+
+export type ExeMap = Map<string, string>;
 
 export async function runExe(
   command: string,
   args: string[],
+  state: ShellState,
 ): Promise<CommandOutput> {
-  const exePath = getExePath(command);
-
+  const exePath = state.exeMap.get(command);
   if (!exePath) {
     return {
       stdout: stringToStdStream(''),
@@ -31,9 +34,7 @@ export async function runExe(
   };
 }
 
-export function getAllExeNames() {
-  const exeNames = [];
-
+export function createExeMap(exeMap: ExeMap) {
   const pathDirs = getPathDirs();
   for (const dir of pathDirs) {
     if (!existsSync(dir)) continue;
@@ -41,30 +42,11 @@ export function getAllExeNames() {
     const files = readdirSync(dir);
     for (const fileName of files) {
       const filePath = resolve(dir, fileName);
-      if (isExecutable(filePath)) {
-        exeNames.push(fileName);
-      }
+      if (!isExecutable(filePath)) continue;
+
+      exeMap.set(fileName, filePath);
     }
   }
-
-  return exeNames;
-}
-
-export function getExePath(exeName: string) {
-  const pathDirs = getPathDirs();
-  for (const dir of pathDirs) {
-    if (!existsSync(dir)) continue;
-
-    const files = readdirSync(dir);
-    if (files.includes(exeName)) {
-      const filePath = resolve(dir, exeName);
-      if (isExecutable(filePath)) {
-        return filePath;
-      }
-    }
-  }
-
-  return null;
 }
 
 function getPathDirs() {
