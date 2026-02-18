@@ -4,6 +4,7 @@ import { type StdStream } from './output';
 import type { ShellState } from './shell';
 
 export type LastAppendedIndexMap = Map<string, number>;
+type Result = { ok: true } | { ok: false; err: string };
 
 export function createFormattedHistoryStream(
   history: Interface['history'],
@@ -26,7 +27,7 @@ export function createFormattedHistoryStream(
 export async function readHistoryFile(
   filePath: string,
   history: Interface['history'],
-): Promise<{ ok: false; err: string } | { ok: true }> {
+): Promise<Result> {
   let rl;
   try {
     const stream = createReadStream(filePath);
@@ -67,7 +68,7 @@ export async function readHistoryFile(
 export function writeHistoryToFile(
   filePath: string,
   history: Interface['history'],
-): { ok: false; err: string } | { ok: true } {
+): Result {
   try {
     const stream = createWriteStream(filePath, { flags: 'w' });
 
@@ -91,7 +92,7 @@ export function writeHistoryToFile(
 export function appendHistoryToFile(
   filePath: string,
   state: ShellState,
-): { ok: false; err: string } | { ok: true } {
+): Result {
   let lastIndex = state.lastAppendedIndexByFilePath.get(filePath) ?? -1;
 
   try {
