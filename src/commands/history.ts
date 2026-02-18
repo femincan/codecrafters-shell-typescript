@@ -1,13 +1,11 @@
 import { registerCommand } from '@/lib/command';
 import {
-  createAppender,
+  appendHistoryToFile,
   createFormattedHistoryStream,
   readHistoryFile,
   writeHistoryToFile,
 } from '@/lib/history';
 import { stringToStdStream } from '@/lib/output';
-
-const appendToHistoryFile = createAppender();
 
 export default registerCommand('history', async (args, state) => {
   let stdout = stringToStdStream(''),
@@ -62,10 +60,7 @@ export default registerCommand('history', async (args, state) => {
         break;
       }
 
-      const appendResult = appendToHistoryFile(
-        historyFilePath,
-        state.rl.history,
-      );
+      const appendResult = appendHistoryToFile(historyFilePath, state);
       if (!appendResult.ok) {
         stderr = stringToStdStream(appendResult.err);
       }

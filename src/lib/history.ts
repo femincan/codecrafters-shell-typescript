@@ -2,6 +2,9 @@ import { createReadStream, createWriteStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 import type { Interface } from 'node:readline/promises';
 import { type StdStream } from './output';
+import type { ShellState } from './shell';
+
+export type LastAppendedIndexMap = Map<string, number>;
 
 export function createFormattedHistoryStream(
   history: Interface['history'],
@@ -73,30 +76,29 @@ export function writeHistoryToFile(
   }
 }
 
-export function createAppender() {
-  let lastIndex = -1;
+export function appendHistoryToFile(
+  filePath: string,
+  state: ShellState,
+): { ok: false; err: string } | { ok: true } {
+  let lastIndex = state.lastAppendedIndexByFilePath.get(filePath) ?? -1;
 
-  return (
-    filePath: string,
-    history: string[],
-  ): { ok: false; err: string } | { ok: true } => {
-    try {
-      const stream = createWriteStream(filePath, { flags: 'a' });
+  try {
+    const stream = createWriteStream(filePath, { flags: 'a' });
 
-      for (; lastIndex >= -history.length; lastIndex--) {
-        stream.write(`${history.at(lastIndex)}\n`);
-      }
-
-      stream.end();
-      return { ok: true };
-    } catch (error) {
-      return {
-        ok: false,
-        err:
-          error instanceof Error
-            ? error.message
-            : `Failed to open history file: ${filePath}`,
-      };
+    while (lastIndex >= -state.rl.history.length) {
+      stream.write(`${state.rl.history.at(lastIndex--)}\n`);
     }
-  };
+
+    state.lastAppendedIndexByFilePath.set(filePath, lastIndex);
+    stream.end();
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      err:
+        error instanceof Error
+          ? error.message
+          : `Failed to open history file: ${filePath}`,
+    };
+  }
 }
