@@ -1,6 +1,5 @@
 import { createReadStream, createWriteStream } from 'node:fs';
-import { createInterface } from 'node:readline';
-import type { Interface } from 'node:readline/promises';
+import { type Interface, createInterface } from 'node:readline/promises';
 import { type StdStream } from './output';
 import type { ShellState } from './shell';
 
@@ -28,10 +27,11 @@ export async function readHistoryFile(
   filePath: string,
   history: Interface['history'],
 ): Promise<{ ok: false; err: string } | { ok: true }> {
+  let rl;
   try {
     const stream = createReadStream(filePath);
 
-    const rl = createInterface({
+    rl = createInterface({
       input: stream,
       crlfDelay: Infinity,
     });
@@ -42,13 +42,25 @@ export async function readHistoryFile(
 
     return { ok: true };
   } catch (error) {
+    let errorMessage;
+    if (error instanceof Error) {
+      if ('code' in error && error.code === 'ENOENT') {
+        errorMessage = 'History file not found.';
+      } else {
+        errorMessage = error.message;
+      }
+    } else {
+      errorMessage = `Failed to open history file: ${filePath}`;
+    }
+
     return {
       ok: false,
-      err:
-        error instanceof Error
-          ? error.message
-          : `Failed to open history file: ${filePath}`,
+      err: errorMessage,
     };
+  } finally {
+    if (rl) {
+      rl.close();
+    }
   }
 }
 
