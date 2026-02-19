@@ -1,8 +1,8 @@
 import { registerCommand } from '@/lib/command';
-import { writeHistoryToFileOnExit } from '@/lib/history';
+import { appendHistoryToFileOnExit } from '@/lib/history';
 
 export default registerCommand('exit', async (args, state) => {
   state.rl.close();
-  await writeHistoryToFileOnExit(state.rl.history);
+  await appendHistoryToFileOnExit(state);
   process.exit(Number(args[0]) || 0);
 });

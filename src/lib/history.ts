@@ -32,19 +32,18 @@ export async function readHistoryFileOnStartUp(
   if (!filePath) return;
 
   const result = await readHistoryFile(filePath, history);
-
   if (!result.ok) return;
 
-  lastAppendedIndexMap.set(filePath, -history.length);
+  lastAppendedIndexMap.set(filePath, -(history.length + 1));
 
   return history;
 }
 
-export async function writeHistoryToFileOnExit(history: Interface['history']) {
+export async function appendHistoryToFileOnExit(state: ShellState) {
   const filePath = Bun.env.HISTFILE;
   if (!filePath) return;
 
-  await writeHistoryToFile(filePath, history);
+  await appendHistoryToFile(filePath, state);
 }
 
 export async function readHistoryFile(
