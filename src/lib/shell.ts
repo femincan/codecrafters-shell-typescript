@@ -16,9 +16,12 @@ export class ShellState {
   }
 
   async initialize() {
+    // Commands
     await registerCommands(this.commands);
     createExeMap(this.exeMap);
     createCommandsTrie(this.commands, this.exeMap);
+
+    // History
     readHistoryFileOnStartUp(this.rl.history, this.lastAppendedIndexByFilePath);
   }
 }
