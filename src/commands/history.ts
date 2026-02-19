@@ -41,7 +41,7 @@ export default registerCommand('history', async (args, state) => {
         break;
       }
 
-      const appendResult = writeHistoryToFile(
+      const appendResult = await writeHistoryToFile(
         historyFilePath,
         state.rl.history,
       );
@@ -60,7 +60,7 @@ export default registerCommand('history', async (args, state) => {
         break;
       }
 
-      const appendResult = appendHistoryToFile(historyFilePath, state);
+      const appendResult = await appendHistoryToFile(historyFilePath, state);
       if (!appendResult.ok) {
         stderr = stringToStdStream(appendResult.err);
       }

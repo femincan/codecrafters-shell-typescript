@@ -65,19 +65,21 @@ export async function readHistoryFile(
   }
 }
 
-export function writeHistoryToFile(
+export async function writeHistoryToFile(
   filePath: string,
   history: Interface['history'],
-): Result {
+): Promise<Result> {
   try {
     const stream = createWriteStream(filePath, { flags: 'w' });
 
     for (let i = history.length - 1; i >= 0; i--) {
       stream.write(`${history[i]}\n`);
     }
-
     stream.end();
-    return { ok: true };
+
+    return await new Promise((resolve) =>
+      stream.on('finish', () => resolve({ ok: true })),
+    );
   } catch (error) {
     return {
       ok: false,
@@ -89,10 +91,10 @@ export function writeHistoryToFile(
   }
 }
 
-export function appendHistoryToFile(
+export async function appendHistoryToFile(
   filePath: string,
   state: ShellState,
-): Result {
+): Promise<Result> {
   let lastIndex = state.lastAppendedIndexByFilePath.get(filePath) ?? -1;
 
   try {
@@ -101,10 +103,12 @@ export function appendHistoryToFile(
     while (lastIndex >= -state.rl.history.length) {
       stream.write(`${state.rl.history.at(lastIndex--)}\n`);
     }
-
     state.lastAppendedIndexByFilePath.set(filePath, lastIndex);
     stream.end();
-    return { ok: true };
+
+    return await new Promise((resolve) =>
+      stream.on('finish', () => resolve({ ok: true })),
+    );
   } catch (error) {
     return {
       ok: false,
