@@ -2,7 +2,7 @@ import type { Interface as ReadlineInterface } from 'node:readline/promises';
 import { createCommandsTrie } from './autocomplete';
 import { registerCommands, type CommandsMap } from './command';
 import { createExeMap, type ExeMap } from './exe';
-import type { LastAppendedIndexMap } from './history';
+import { readHistoryFileOnStartUp, type LastAppendedIndexMap } from './history';
 import { createReadlineInterface } from './readline';
 
 export class ShellState {
@@ -19,5 +19,6 @@ export class ShellState {
     await registerCommands(this.commands);
     createExeMap(this.exeMap);
     createCommandsTrie(this.commands, this.exeMap);
+    readHistoryFileOnStartUp(this.rl.history, this.lastAppendedIndexByFilePath);
   }
 }

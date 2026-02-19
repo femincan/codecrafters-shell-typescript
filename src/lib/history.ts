@@ -24,6 +24,22 @@ export function createFormattedHistoryStream(
   });
 }
 
+export async function readHistoryFileOnStartUp(
+  history: Interface['history'],
+  lastAppendedIndexMap: LastAppendedIndexMap,
+) {
+  const filePath = Bun.env.HISTFILE;
+  if (!filePath) return;
+
+  const result = await readHistoryFile(filePath, history);
+
+  if (!result.ok) return;
+
+  lastAppendedIndexMap.set(filePath, -history.length);
+
+  return history;
+}
+
 export async function readHistoryFile(
   filePath: string,
   history: Interface['history'],
