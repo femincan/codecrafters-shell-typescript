@@ -1,7 +1,6 @@
 import { createReadStream, createWriteStream } from 'node:fs';
 import { type Interface, createInterface } from 'node:readline/promises';
 import { type StdStream } from './output';
-import type { ShellState } from './shell';
 
 export type LastAppendedIndexMap = Map<string, number>;
 type Result = { ok: true } | { ok: false; err: string };
@@ -39,11 +38,14 @@ export async function readHistoryFileOnStartUp(
   return history;
 }
 
-export async function appendHistoryToFileOnExit(state: ShellState) {
+export async function appendHistoryToFileOnExit(
+  history: Interface['history'],
+  lastAppendedIndexMap: LastAppendedIndexMap,
+) {
   const filePath = Bun.env.HISTFILE;
   if (!filePath) return;
 
-  await appendHistoryToFile(filePath, state);
+  await appendHistoryToFile(filePath, history, lastAppendedIndexMap);
 }
 
 export async function readHistoryFile(
@@ -115,17 +117,18 @@ export async function writeHistoryToFile(
 
 export async function appendHistoryToFile(
   filePath: string,
-  state: ShellState,
+  history: Interface['history'],
+  lastAppendedIndexMap: LastAppendedIndexMap,
 ): Promise<Result> {
-  let lastIndex = state.lastAppendedIndexByFilePath.get(filePath) ?? -1;
+  let lastIndex = lastAppendedIndexMap.get(filePath) ?? -1;
 
   try {
     const stream = createWriteStream(filePath, { flags: 'a' });
 
-    while (lastIndex >= -state.rl.history.length) {
-      stream.write(`${state.rl.history.at(lastIndex--)}\n`);
+    while (lastIndex >= -history.length) {
+      stream.write(`${history.at(lastIndex--)}\n`);
     }
-    state.lastAppendedIndexByFilePath.set(filePath, lastIndex);
+    lastAppendedIndexMap.set(filePath, lastIndex);
     stream.end();
 
     return await new Promise((resolve) =>

@@ -3,6 +3,9 @@ import { appendHistoryToFileOnExit } from '@/lib/history';
 
 export default registerCommand('exit', async (args, state) => {
   state.rl.close();
-  await appendHistoryToFileOnExit(state);
+  await appendHistoryToFileOnExit(
+    state.rl.history,
+    state.lastAppendedIndexByFilePath,
+  );
   process.exit(Number(args[0]) || 0);
 });
