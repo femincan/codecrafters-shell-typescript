@@ -40,6 +40,13 @@ export async function readHistoryFileOnStartUp(
   return history;
 }
 
+export async function writeHistoryToFileOnExit(history: Interface['history']) {
+  const filePath = Bun.env.HISTFILE;
+  if (!filePath) return;
+
+  await writeHistoryToFile(filePath, history);
+}
+
 export async function readHistoryFile(
   filePath: string,
   history: Interface['history'],
