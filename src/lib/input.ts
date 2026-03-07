@@ -1,7 +1,7 @@
 export type RedirectData = {
   type: 'stdout' | 'stderr';
   file: string;
-  mode: 'write' | 'append';
+  mode: 'w' | 'a';
 };
 export type CommandNode = {
   command: string;
@@ -12,12 +12,12 @@ export type ParseInputResult = CommandNode[];
 
 const charsToEscapeInDoubleQuotes = new Set(['"', '\\', '$', '`']);
 const redirectMap = new Map<string, Pick<RedirectData, 'type' | 'mode'>>([
-  ['>', { type: 'stdout', mode: 'write' }],
-  ['1>', { type: 'stdout', mode: 'write' }],
-  ['>>', { type: 'stdout', mode: 'append' }],
-  ['1>>', { type: 'stdout', mode: 'append' }],
-  ['2>', { type: 'stderr', mode: 'write' }],
-  ['2>>', { type: 'stderr', mode: 'append' }],
+  ['>', { type: 'stdout', mode: 'w' }],
+  ['1>', { type: 'stdout', mode: 'w' }],
+  ['>>', { type: 'stdout', mode: 'a' }],
+  ['1>>', { type: 'stdout', mode: 'a' }],
+  ['2>', { type: 'stderr', mode: 'w' }],
+  ['2>>', { type: 'stderr', mode: 'a' }],
 ]);
 
 export function parseInput(input: string): ParseInputResult {
