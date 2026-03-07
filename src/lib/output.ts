@@ -1,7 +1,7 @@
 import { createWriteStream, type WriteStream } from 'node:fs';
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
 import type { CommandOutput } from './command';
-import type { ParseInputResult, RedirectType } from './input';
+import type { CommandNode, ParseInputResult, RedirectData } from './input';
 
 export type StdStream = ReadableStream<StdOutput>;
 export type StdOutput = Uint8Array<ArrayBuffer>;
@@ -37,11 +37,11 @@ export function stdOutputToString(output: StdOutput) {
 
 async function redirectOutput(
   output: CommandOutput,
-  redirect: NonNullable<ParseInputResult['redirect']>,
+  redirect: NonNullable<CommandNode['redirect']>,
 ) {
   const reader = output[redirect.type].getReader();
-  const writeStream = createWriteStream(redirect.targetFile, {
-    flags: redirect.override ? 'w' : 'a',
+  const writeStream = createWriteStream(redirect.file, {
+    flags: redirect.mode satisfies 'w' | 'a', // `satisfies` is here to make sure modes are compatible with flags if the type for modes is changed later
   });
 
   await writeStreamOutput(reader, writeStream);
@@ -59,7 +59,7 @@ async function printOutput({ stdout, stderr }: CommandOutput) {
   }
 }
 
-async function printStdStream(stream: StdStream, type: RedirectType) {
+async function printStdStream(stream: StdStream, type: RedirectData['type']) {
   const reader = stream.getReader();
 
   await writeStreamOutput(reader, Bun[type]);
