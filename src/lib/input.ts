@@ -8,6 +8,7 @@ export type CommandNode = {
   args: string[];
   redirect?: RedirectData;
 };
+export type ParseInputResult = CommandNode[];
 
 const charsToEscapeInDoubleQuotes = new Set(['"', '\\', '$', '`']);
 const redirectMap = new Map<string, Pick<RedirectData, 'type' | 'mode'>>([
@@ -19,7 +20,7 @@ const redirectMap = new Map<string, Pick<RedirectData, 'type' | 'mode'>>([
   ['2>>', { type: 'stderr', mode: 'append' }],
 ]);
 
-export function parseInput(input: string): CommandNode[] {
+export function parseInput(input: string): ParseInputResult {
   const parsedArgs = parseArgs(input.trim());
   const parsedInput: CommandNode[] = [];
 
